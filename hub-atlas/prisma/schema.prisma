@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+// Sincronizado com o Clerk via webhook (clerkId = user id do Clerk).
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  role      Role     @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contact   Contact?      @relation(fields: [contactId], references: [id])
+  contactId String?       @unique
+  documents Document[]
+}
+
+// Coluna do kanban do pipeline de CRM.
+model PipelineStage {
+  id       String    @id @default(cuid())
+  name     String
+  order    Int       @unique
+  contacts Contact[]
+}
+
+// Lead ou cliente. Um Contact vira "cliente com acesso ao portal" quando
+// ganha um User com role=CLIENT vinculado.
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stageId String
+  stage   PipelineStage @relation(fields: [stageId], references: [id])
+
+  user         User?
+  appointments Appointment[]
+  documents    Document[]
+
+  @@index([stageId])
+  @@index([email])
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+model Appointment {
+  id               String            @id @default(cuid())
+  title            String
+  startsAt         DateTime
+  endsAt           DateTime
+  status           AppointmentStatus @default(SCHEDULED)
+  calComBookingUid String?
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id])
+
+  @@index([contactId])
+  @@index([startsAt])
+}
+
+model Document {
+  id           String   @id @default(cuid())
+  fileName     String
+  gcsObjectKey String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id])
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  @@index([contactId])
+}
