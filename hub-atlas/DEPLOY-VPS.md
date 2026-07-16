@@ -27,6 +27,23 @@ Ao criar a máquina:
 - Abra as portas **22, 80, 443** (firewall do provedor)
 - Guarde o **IP público**
 
+### ⚠️ Pegadinhas da Oracle Always Free (leia se for Oracle)
+
+1. **Use ARM, não o micro x86.** Escolha shape **VM.Standard.A1.Flex** (Ampere/ARM) com
+   **2 OCPU + 12 GB** (cabe no always-free de 4 OCPU/24GB). O `next build` roda na própria
+   VM e o micro x86 (1 GB RAM) provavelmente dá **out of memory**. Se a Oracle reclamar de
+   *"out of capacity"*, troque o Availability Domain ou tente de novo mais tarde.
+2. **Usuário SSH é `ubuntu`, não `root`.** Conecte com `ssh ubuntu@IP` (guarde a chave privada
+   que a Oracle gera/você sobe). Comandos que mexem no sistema pedem `sudo`.
+3. **Firewall em DUAS camadas** — HTTPS não funciona até abrir as duas:
+   - **VCN Security List** (no painel Oracle): adicione Ingress `0.0.0.0/0` TCP **80** e **443**.
+   - **iptables do Ubuntu** (a imagem da Oracle bloqueia tudo menos o 22). Dentro da VM:
+     ```bash
+     sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+     sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+     sudo netfilter-persistent save
+     ```
+
 ---
 
 ## 1. Apontar o domínio (opcional, mas recomendado pra HTTPS)
