@@ -96,10 +96,14 @@ A versão instalada do Clerk (`@clerk/nextjs` 7.x) marca `createRouteMatcher` co
 - Auth funcional com roles (admin Atlas / cliente) e proteção de rotas.
 
 ### Fase 2 — CRM núcleo (dias 7-12) · coração do Hub
-- CRUD de contatos/leads.
-- Pipeline visual (kanban por status), drag-and-drop.
-- Busca e filtros.
-- É aqui que UX e fluidez precisam brilhar. Investe o capricho aqui.
+- CRUD de contatos/leads. ✅ (`src/features/crm/actions.ts` + `contact-form.tsx`, rotas em `/dashboard/contacts`)
+- Pipeline visual (kanban por status), drag-and-drop. ✅ (`/dashboard/pipeline`, `kanban-board.tsx` — HTML5 drag nativo, sem lib nova)
+- Busca e filtros. ✅ (busca por nome/email/empresa em `/dashboard/contacts`, via `?q=`)
+- É aqui que UX e fluidez precisam brilhar. Investe o capricho aqui. — versão atual é funcional/MVP (Tailwind puro, sem componente de design ainda); capricho visual fica pro polish da Fase 5.
+- Seed de `PipelineStage` criado em `prisma/seed.ts` (`npx prisma db seed`) com 6 estágios-padrão (Novo Lead → Fechado). Ajustar nomes se não bater com o funil real da Atlas.
+- Todas as Server Actions fazem `requireAdmin()` internamente (não dependem só da proteção do layout — Server Functions são alcançáveis por POST direto).
+
+**Adiado (fora do escopo de hoje, 15/jul):** deploy "hello world" no Cloud Run (meta original da Fase 0, dia 1) — decisão consciente de priorizar o CRM núcleo primeiro.
 
 ### Fase 3 — Agendamentos (dias 13-15)
 - Integrar Cal.com (embed ou API) ou modelo próprio de slots.

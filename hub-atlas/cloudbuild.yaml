@@ -1,0 +1,53 @@
+# Pipeline de build + deploy do Hub Atlas no Cloud Run.
+# Rode a partir de hub-atlas/:
+#   gcloud builds submit --config cloudbuild.yaml \
+#     --substitutions _CLERK_PUBLISHABLE_KEY=pk_test_xxx
+# (ou conecte como trigger no GitHub — ver DEPLOY.md)
+
+substitutions:
+  _REGION: us-east1          # mesma região do Neon (us-east-1) → menor latência
+  _SERVICE: hub-atlas
+  _REPO: hub-atlas           # repositório do Artifact Registry
+  _TAG: latest
+  _CLERK_PUBLISHABLE_KEY: "" # passado no --substitutions (é público, não é secret)
+
+steps:
+  # 1) Build da imagem, injetando a publishable key do Clerk como build-arg
+  #    (NEXT_PUBLIC_* precisa existir em tempo de build — ver Dockerfile).
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:${_TAG}
+      - --build-arg
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${_CLERK_PUBLISHABLE_KEY}
+      - .
+
+  # 2) Push pra Artifact Registry
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:${_TAG}
+
+  # 3) Deploy no Cloud Run. Secrets vêm do Secret Manager; min-instances=1
+  #    mata o cold start (do app e mantém o Neon quente).
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:${_TAG}
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --min-instances=1
+      - --port=8080
+      - --set-secrets=DATABASE_URL=DATABASE_URL:latest,DIRECT_URL=DIRECT_URL:latest,CLERK_SECRET_KEY=CLERK_SECRET_KEY:latest,CLERK_WEBHOOK_SIGNING_SECRET=CLERK_WEBHOOK_SIGNING_SECRET:latest
+      - --set-env-vars=NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in,NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up,NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/portal,NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/portal
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:${_TAG}
+
+options:
+  logging: CLOUD_LOGGING_ONLY

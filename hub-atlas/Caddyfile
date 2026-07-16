@@ -1,0 +1,9 @@
+# Caddy pega certificado TLS sozinho (Let's Encrypt) pro seu domínio e faz
+# proxy reverso pro app. O {$DOMAIN} vem da variável de ambiente do compose.
+#
+# Enquanto não tiver domínio, você pode testar trocando a 1ª linha por :80
+# (sem HTTPS) e acessando http://IP-DO-VPS.
+
+{$DOMAIN} {
+	reverse_proxy app:8080
+}

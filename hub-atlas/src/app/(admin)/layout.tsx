@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getCurrentUser } from "@/features/auth/current-user";
+import { AdminNav } from "./_components/admin-nav";
 
 export default async function AdminLayout({
   children,
@@ -12,5 +13,10 @@ export default async function AdminLayout({
   const dbUser = await getCurrentUser();
   if (dbUser?.role !== "ADMIN") notFound();
 
-  return <>{children}</>;
+  return (
+    <>
+      <AdminNav />
+      {children}
+    </>
+  );
 }

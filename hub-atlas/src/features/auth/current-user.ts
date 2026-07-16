@@ -29,3 +29,13 @@ export async function getCurrentUser() {
     update: { email, name, role },
   });
 }
+
+// Server Functions são alcançáveis por POST direto, não só pela UI protegida
+// pelo layout — todo mutation de admin precisa checar o role de novo aqui.
+export async function requireAdmin() {
+  const user = await getCurrentUser();
+  if (user?.role !== "ADMIN") {
+    throw new Error("Forbidden: admin role required");
+  }
+  return user;
+}

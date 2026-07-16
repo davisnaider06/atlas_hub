@@ -1,0 +1,72 @@
+# Stack completa do Hub Atlas num VPS sempre-ligado (zero cold start).
+# app (Next standalone) + Postgres local + Caddy (HTTPS automático).
+#
+# Subir:   docker compose up -d --build
+# Logs:    docker compose logs -f app
+# Migrar:  roda sozinho no serviço `migrator` antes do app subir.
+#
+# Variáveis vêm do arquivo .env ao lado (copie de .env.vps.example).
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: atlas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: atlas
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atlas -d atlas"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # Roda `prisma migrate deploy` e encerra. O app só sobe depois que isto
+  # termina com sucesso. Seed é manual (ver DEPLOY-VPS.md).
+  migrator:
+    build:
+      context: .
+      target: migrator
+      args:
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

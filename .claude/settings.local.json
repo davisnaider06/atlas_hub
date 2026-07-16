@@ -3,7 +3,16 @@
     "allow": [
       "Bash(npx create-next-app@latest hub-atlas --typescript --app --eslint --tailwind --src-dir --import-alias \"@/*\" --use-npm --yes)",
       "Bash(npm install *)",
-      "Bash(npx prisma *)"
+      "Bash(npx prisma *)",
+      "Bash(npm run *)",
+      "Bash(gcloud --version)",
+      "Bash(command -v gcloud)",
+      "Bash(echo \"exit:$?\")",
+      "Read(//c/Users/davi.snaider/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/**)",
+      "Read(//c/Program Files \\\\\\(x86\\\\\\)/Google/Cloud SDK/google-cloud-sdk/bin/**)",
+      "Read(//c/Program Files/Google/Cloud SDK/google-cloud-sdk/bin/**)",
+      "Bash(\"/c/Users/davi.snaider/AppData/Local/Google/Cloud SDK/google-cloud-sdk/bin/gcloud\" --version)",
+      "Bash(git add *)"
     ]
   }
 }
