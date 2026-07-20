@@ -1,26 +1,188 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Dark mode por atributo no <html data-theme="dark">, controlado pelo toggle.
+   (Tailwind 4 exige @custom-variant pra não depender do prefers-color-scheme.)
+   --------------------------------------------------------------------------- */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Sidebar retraída: estado fica no <html data-sidebar="collapsed">, igual ao
+   tema. Permite `collapsed:` em qualquer elemento e evita flash no carregamento. */
+@custom-variant collapsed (&:where([data-sidebar="collapsed"] *));
+
+/* ---------------------------------------------------------------------------
+   TOKENS — paleta extraída das referências de design (dashboards CoinSphere /
+   Nexbit): preto QUENTE (não cinza neutro) + laranja de acento + brilho ambiente.
+
+   Componentes devem usar SEMPRE os tokens semânticos e nunca cores cruas.
+   --------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  /* superfícies — variante clara (contraparte do tema escuro da referência) */
+  --bg: #fbf9f8;
+  --bg-tint: #f5efea;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-hover: #f4efec;
+  --surface-sunken: #f0ebe8;
+
+  --border: #e8e0da;
+  --border-strong: #d8cec6;
+
+  --text: #17120f;
+  --text-muted: #6b6058;
+  --text-subtle: #9a8d84;
+
+  /* marca — laranja das referências */
+  --brand: #f2631f;
+  --brand-hover: #dd5715;
+  --brand-fg: #ffffff;
+  --brand-subtle: #fdeee6;
+  --brand-border: #f8c8ae;
+  --brand-glow: 242 99 31;
+
+  /* estados */
+  --success: #15803d;
+  --success-subtle: #eafaf0;
+  --danger: #dc2626;
+  --danger-subtle: #fdeeee;
+  --warning: #b45309;
+  --warning-subtle: #fdf4e7;
+
+  /* vidro (glassmorphism iOS) */
+  --glass-bg: rgb(255 255 255 / 0.62);
+  --glass-border: rgb(255 255 255 / 0.75);
+  --glass-blur: 20px;
+
+  --ring: var(--brand);
 }
 
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* preto quente: tem tinta laranja/marrom, não é cinza puro */
+  --bg: #0a0705;
+  --bg-tint: #150d08;
+  --surface: #13100e;
+  --surface-raised: #1a1512;
+  --surface-hover: #221b16;
+  --surface-sunken: #0d0a08;
+
+  --border: #2a211b;
+  --border-strong: #3a2e26;
+
+  --text: #f6f2ef;
+  --text-muted: #a2968c;
+  --text-subtle: #6f635a;
+
+  --brand: #ff6b2c;
+  --brand-hover: #ff8149;
+  --brand-fg: #150d08;
+  --brand-subtle: #2a170d;
+  --brand-border: #5c3018;
+  --brand-glow: 255 107 44;
+
+  --success: #34d399;
+  --success-subtle: #0c2118;
+  --danger: #f87171;
+  --danger-subtle: #2a1213;
+  --warning: #fbbf24;
+  --warning-subtle: #261a06;
+
+  --glass-bg: rgb(255 255 255 / 0.07);
+  --glass-border: rgb(255 255 255 / 0.16);
+  --glass-blur: 24px;
+}
+
+/* ---------------------------------------------------------------------------
+   Expõe os tokens como utilitários: bg-surface, text-muted, border-border...
+   --------------------------------------------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-bg-tint: var(--bg-tint);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-sunken: var(--surface-sunken);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-brand-border: var(--brand-border);
+
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --------------------------------------------------------------------------- */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Brilho ambiente quente das referências: uma aura laranja difusa no topo da
+   página, atrás de tudo. Só no tema escuro — no claro polui. */
+[data-theme="dark"] body::before {
+  content: "";
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 50% at 75% 6%, rgb(var(--brand-glow) / 0.42), transparent 68%),
+    radial-gradient(40% 42% at 18% 2%, rgb(var(--brand-glow) / 0.24), transparent 70%),
+    radial-gradient(35% 38% at 45% 22%, rgb(255 140 60 / 0.14), transparent 72%);
+  filter: blur(36px);
+}
+
+/* ---------------------------------------------------------------------------
+   GLASSMORPHISM (estilo iOS): translúcido + blur + saturação. A saturação é o
+   que dá o efeito "vidro da Apple" — sem ela fica só um cinza borrado.
+   --------------------------------------------------------------------------- */
+@utility glass {
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 0.06), transparent 60%),
+    var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+  border: 1px solid var(--glass-border);
+}
+
+/* Vidro com realce especular no topo, imitando a luz batendo na borda do painel
+   (é esse detalhe que faz parecer vidro de verdade e não um retângulo opaco). */
+@utility glass-panel {
+  background:
+    linear-gradient(to bottom, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.02) 55%),
+    var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.18),
+    inset 0 -1px 0 0 rgb(0 0 0 / 0.15),
+    0 12px 40px -12px rgb(0 0 0 / 0.55);
+}
+
+/* foco visível e consistente em tudo que é interativo */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
