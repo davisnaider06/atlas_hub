@@ -6,7 +6,7 @@ import { getCurrentUser, requireCapability } from "@/features/auth/current-user"
 import { PAPEIS_ATRIBUIVEIS } from "@/features/auth/permissions";
 import type { Role } from "@/generated/prisma/enums";
 
-function papelValido(valor: FormDataEntryValue | null): Role {
+function papelValido(valor: FormDataEntryValue | string | null): Role {
   const v = String(valor ?? "");
   if (!PAPEIS_ATRIBUIVEIS.includes(v as Role)) {
     throw new Error("Papel inválido");
@@ -40,9 +40,13 @@ export async function inviteMember(formData: FormData) {
   revalidatePath("/dashboard/team");
 }
 
-export async function updateMemberRole(userId: string, formData: FormData) {
+/**
+ * Recebe o papel direto (e não FormData) porque é chamada do seletor, que salva
+ * na hora que muda — sem botão intermediário.
+ */
+export async function updateMemberRole(userId: string, novoPapel: string) {
   const autor = await requireCapability("team.manage");
-  const role = papelValido(formData.get("role"));
+  const role = papelValido(novoPapel);
 
   // Evita o tiro no pé: rebaixar a si mesmo deixaria a instalação sem ninguém
   // capaz de gerenciar a equipe.

@@ -11,7 +11,8 @@ import {
   PAPEIS_ATRIBUIVEIS,
   ROTULO_PAPEL,
 } from "@/features/auth/permissions";
-import { inviteMember, removeMember, updateMemberRole } from "@/features/team/actions";
+import { inviteMember, removeMember } from "@/features/team/actions";
+import { RoleSelect } from "@/features/team/role-select";
 
 const dataCurta = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
@@ -132,37 +133,19 @@ export default async function TeamPage() {
                   {dataCurta.format(m.createdAt)}
                 </span>
 
-                {/* mudar papel */}
-                <form
-                  action={updateMemberRole.bind(null, m.id)}
-                  className="flex shrink-0 items-center gap-2"
-                >
-                  <select
-                    name="role"
-                    defaultValue={m.role}
-                    disabled={souEu}
-                    title={
+                {/* papel: salva ao mudar, sem botão */}
+                <div className="shrink-0">
+                  <RoleSelect
+                    userId={m.id}
+                    papelAtual={m.role}
+                    desabilitado={souEu}
+                    titulo={
                       souEu
                         ? "Você não pode mudar o próprio papel"
                         : DESCRICAO_PAPEL[m.role]
                     }
-                    className="rounded-lg border border-border bg-surface-sunken/60 px-2.5 py-1.5 text-xs disabled:opacity-50"
-                  >
-                    {PAPEIS_ATRIBUIVEIS.map((p) => (
-                      <option key={p} value={p}>
-                        {ROTULO_PAPEL[p]}
-                      </option>
-                    ))}
-                  </select>
-                  {!souEu && (
-                    <button
-                      type="submit"
-                      className="rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-text"
-                    >
-                      Salvar
-                    </button>
-                  )}
-                </form>
+                  />
+                </div>
 
                 {!souEu && (
                   <form action={removeMember.bind(null, m.id)} className="shrink-0">
