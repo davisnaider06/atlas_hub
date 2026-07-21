@@ -41,7 +41,7 @@ export default async function NewAppointmentPage() {
             title="Você ainda não tem contatos"
             description="Um agendamento precisa estar vinculado a um contato. Cadastre o primeiro."
             action={
-              <Link href="/dashboard/contacts/new" className={buttonClasses("primary")}>
+              <Link href="/dashboard/leads/new" className={buttonClasses("primary")}>
                 <IconPlus className="size-4" />
                 Novo contato
               </Link>

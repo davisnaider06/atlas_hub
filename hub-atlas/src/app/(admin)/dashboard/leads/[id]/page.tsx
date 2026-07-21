@@ -7,6 +7,7 @@ import { updateContact } from "@/features/crm/actions";
 import { ContactForm } from "@/features/crm/contact-form";
 import { DeleteContactButton } from "@/features/crm/delete-contact-button";
 import { getContactById, getPipelineStages } from "@/features/crm/queries";
+import { getActiveServices } from "@/features/services/queries";
 
 function iniciais(nome: string) {
   return nome
@@ -23,14 +24,18 @@ export default async function ContactPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [contact, stages] = await Promise.all([getContactById(id), getPipelineStages()]);
+  const [contact, stages, services] = await Promise.all([
+    getContactById(id),
+    getPipelineStages(),
+    getActiveServices(),
+  ]);
 
   if (!contact) notFound();
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <Link
-        href="/dashboard/contacts"
+        href="/dashboard/leads"
         className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-text"
       >
         <IconChevronLeft className="size-4" />
@@ -64,6 +69,7 @@ export default async function ContactPage({
         <ContactForm
           action={updateContact.bind(null, contact.id)}
           stages={stages}
+          services={services}
           defaultValues={contact}
           submitLabel="Salvar alterações"
         />

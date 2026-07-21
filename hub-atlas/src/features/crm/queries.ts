@@ -4,20 +4,24 @@ export function getPipelineStages() {
   return prisma.pipelineStage.findMany({ orderBy: { order: "asc" } });
 }
 
-export function getContacts(search?: string) {
+/** Busca contatos, opcionalmente filtrando por tipo (leads x clientes). */
+export function getContacts(search?: string, type?: "LEAD" | "CLIENT") {
   const query = search?.trim();
 
   return prisma.contact.findMany({
-    where: query
-      ? {
-          OR: [
-            { name: { contains: query, mode: "insensitive" } },
-            { email: { contains: query, mode: "insensitive" } },
-            { company: { contains: query, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
-    include: { stage: true },
+    where: {
+      ...(type ? { type } : {}),
+      ...(query
+        ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" } },
+              { email: { contains: query, mode: "insensitive" } },
+              { company: { contains: query, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    include: { stage: true, service: true },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -25,7 +29,7 @@ export function getContacts(search?: string) {
 export function getContactById(id: string) {
   return prisma.contact.findUnique({
     where: { id },
-    include: { stage: true },
+    include: { stage: true, service: true },
   });
 }
 

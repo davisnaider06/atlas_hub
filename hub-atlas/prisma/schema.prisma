@@ -77,17 +77,47 @@ model PipelineStage {
   contacts Contact[]
 }
 
-// Lead ou cliente. Um Contact vira "cliente com acesso ao portal" quando
-// ganha um User com role=CLIENT vinculado.
+enum ContactType {
+  LEAD
+  CLIENT
+}
+
+// Serviço oferecido pela Atlas (site, software, automação com IA...).
+// Preços em CENTAVOS: dinheiro em float acumula erro de arredondamento, e
+// inteiro serializa limpo do servidor pro cliente.
+model Service {
+  id            String  @id @default(cuid())
+  name          String
+  description   String?
+  // faixa de negociação: piso e teto
+  priceMinCents Int?
+  priceMaxCents Int?
+  // desativado some dos seletores mas continua nos clientes que já contrataram
+  active        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contacts Contact[]
+}
+
+// Lead ou cliente. Vira CLIENT automaticamente ao entrar no estágio de
+// "Fechado - Ganho"; aí passa a fazer sentido registrar o serviço contratado.
 model Contact {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   name      String
   email     String?
   phone     String?
   company   String?
   notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  type      ContactType @default(LEAD)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // serviço contratado e valor fechado (só fazem sentido quando type=CLIENT)
+  serviceId          String?
+  service            Service? @relation(fields: [serviceId], references: [id])
+  contractValueCents Int?
 
   stageId String
   stage   PipelineStage @relation(fields: [stageId], references: [id])

@@ -29,7 +29,7 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/contacts/new"
+          href="/dashboard/leads/new"
           className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition-colors hover:bg-brand-hover"
         >
           <IconPlus className="size-4" />
@@ -73,7 +73,7 @@ export default async function AdminDashboardPage() {
             title="Atividade recente"
             action={
               <Link
-                href="/dashboard/contacts"
+                href="/dashboard/leads"
                 className="shrink-0 rounded-full border border-border px-3 py-1 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-text"
               >
                 Ver todos
@@ -93,7 +93,7 @@ export default async function AdminDashboardPage() {
                   style={{ animationDelay: `${140 + i * 70}ms` }}
                 >
                   <Link
-                    href={`/dashboard/contacts/${c.id}`}
+                    href={`/dashboard/leads/${c.id}`}
                     className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-surface-hover"
                   >
                     <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-surface-sunken text-xs font-semibold text-muted">

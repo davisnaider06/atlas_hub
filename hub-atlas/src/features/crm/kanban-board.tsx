@@ -91,7 +91,7 @@ export function KanbanBoard({ stages: initialStages }: { stages: PipelineBoard }
                 stage.contacts.map((contact) => (
                   <Link
                     key={contact.id}
-                    href={`/dashboard/contacts/${contact.id}`}
+                    href={`/dashboard/leads/${contact.id}`}
                     draggable
                     onDragStart={(event) => {
                       event.dataTransfer.setData("text/contact-id", contact.id);

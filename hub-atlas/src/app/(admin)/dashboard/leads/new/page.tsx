@@ -4,14 +4,15 @@ import { IconChevronLeft } from "@/components/ui/icons";
 import { createContact } from "@/features/crm/actions";
 import { ContactForm } from "@/features/crm/contact-form";
 import { getPipelineStages } from "@/features/crm/queries";
+import { getActiveServices } from "@/features/services/queries";
 
 export default async function NewContactPage() {
-  const stages = await getPipelineStages();
+  const [stages, services] = await Promise.all([getPipelineStages(), getActiveServices()]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <Link
-        href="/dashboard/contacts"
+        href="/dashboard/leads"
         className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-text"
       >
         <IconChevronLeft className="size-4" />
@@ -26,7 +27,7 @@ export default async function NewContactPage() {
       </div>
 
       <Card className="p-5">
-        <ContactForm action={createContact} stages={stages} submitLabel="Criar contato" />
+        <ContactForm action={createContact} stages={stages} services={services} submitLabel="Criar lead" />
       </Card>
     </div>
   );

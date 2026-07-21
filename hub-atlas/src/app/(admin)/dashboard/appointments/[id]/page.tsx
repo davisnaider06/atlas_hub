@@ -85,7 +85,7 @@ export default async function AppointmentPage({
             <dd className="mt-0.5 truncate text-sm font-medium">
               {appointment.contact ? (
                 <Link
-                  href={`/dashboard/contacts/${appointment.contact.id}`}
+                  href={`/dashboard/leads/${appointment.contact.id}`}
                   className="hover:text-brand"
                 >
                   {appointment.contact.name}

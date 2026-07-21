@@ -119,6 +119,25 @@ export function IconPlus({ className }: IconProps) {
   );
 }
 
+export function IconClients({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M3 21V8l6-4 6 4v13" />
+      <path d="M15 21V11l6 3v7" />
+      <path d="M7 12h2M7 16h2M18 17h.01" />
+    </svg>
+  );
+}
+
+export function IconServices({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M12 2 3 7l9 5 9-5-9-5Z" />
+      <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
+    </svg>
+  );
+}
+
 export function IconPencil({ className }: IconProps) {
   return (
     <svg {...base(className)}>

@@ -18,7 +18,7 @@ export default async function PipelinePage() {
             entre os estágios
           </p>
         </div>
-        <Link href="/dashboard/contacts/new" className={buttonClasses("primary")}>
+        <Link href="/dashboard/leads/new" className={buttonClasses("primary")}>
           <IconPlus className="size-4" />
           Novo contato
         </Link>

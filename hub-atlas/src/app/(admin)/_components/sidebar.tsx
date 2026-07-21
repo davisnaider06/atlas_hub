@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   IconChevronLeft,
+  IconClients,
   IconContacts,
   IconDocuments,
   IconGrid,
   IconHelp,
   IconPipeline,
   IconSchedule,
+  IconServices,
   IconSettings,
 } from "@/components/ui/icons";
 
@@ -22,13 +24,18 @@ type NavItem = {
 
 const sections: { title: string; items: NavItem[] }[] = [
   {
-    title: "Principal",
+    title: "Comercial",
     items: [
       { href: "/dashboard", label: "Painel", icon: IconGrid },
-      { href: "/dashboard/contacts", label: "Contatos", icon: IconContacts },
+      { href: "/dashboard/leads", label: "Leads", icon: IconContacts },
+      { href: "/dashboard/clients", label: "Clientes", icon: IconClients },
       { href: "/dashboard/pipeline", label: "Pipeline", icon: IconPipeline },
       { href: "/dashboard/appointments", label: "Agendamentos", icon: IconSchedule },
     ],
+  },
+  {
+    title: "Catálogo",
+    items: [{ href: "/dashboard/services", label: "Serviços", icon: IconServices }],
   },
   {
     title: "Em breve",

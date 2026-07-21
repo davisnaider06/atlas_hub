@@ -33,7 +33,7 @@ export default async function ContactsPage({
             {buscando ? " encontrados" : " na base"}
           </p>
         </div>
-        <Link href="/dashboard/contacts/new" className={buttonClasses("primary")}>
+        <Link href="/dashboard/leads/new" className={buttonClasses("primary")}>
           <IconPlus className="size-4" />
           Novo contato
         </Link>
@@ -65,12 +65,12 @@ export default async function ContactsPage({
             }
             action={
               buscando ? (
-                <Link href="/dashboard/contacts" className={buttonClasses("secondary")}>
+                <Link href="/dashboard/leads" className={buttonClasses("secondary")}>
                   Limpar busca
                 </Link>
               ) : (
                 <Link
-                  href="/dashboard/contacts/new"
+                  href="/dashboard/leads/new"
                   className={buttonClasses("primary")}
                 >
                   <IconPlus className="size-4" />
@@ -95,7 +95,7 @@ export default async function ContactsPage({
                   <tr key={contact.id} className="transition-colors hover:bg-surface-hover">
                     <td className="px-4 py-3">
                       <Link
-                        href={`/dashboard/contacts/${contact.id}`}
+                        href={`/dashboard/leads/${contact.id}`}
                         className="flex items-center gap-3"
                       >
                         <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-surface-sunken text-xs font-semibold text-muted">
