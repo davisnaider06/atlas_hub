@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { requireAdminOrRedirect } from "@/features/google/route-guard";
+import { requireCapabilityOrRedirect } from "@/features/google/route-guard";
 import { exchangeCodeAndSave } from "@/features/google/oauth";
 import { STATE_COOKIE } from "../connect/route";
 
 /** Volta do Google: valida o state, troca o code por tokens e salva. */
 export async function GET(request: Request) {
-  const user = await requireAdminOrRedirect("/dashboard/settings");
+  const user = await requireCapabilityOrRedirect("appointments.manage", "/dashboard/settings");
 
   const url = new URL(request.url);
   const code = url.searchParams.get("code");

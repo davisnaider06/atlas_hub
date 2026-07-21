@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
 import { getCurrentUser } from "@/features/auth/current-user";
+import { podeAcessarPainel } from "@/features/auth/permissions";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default async function PortalLayout({
@@ -28,7 +29,7 @@ export default async function PortalLayout({
 
           <div className="ml-auto flex items-center gap-2">
             {/* admin cai no portal ao logar; sem isto ele fica sem caminho de volta */}
-            {dbUser.role === "ADMIN" && (
+            {podeAcessarPainel(dbUser.role) && (
               <Link
                 href="/dashboard"
                 className="rounded-full border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-text"

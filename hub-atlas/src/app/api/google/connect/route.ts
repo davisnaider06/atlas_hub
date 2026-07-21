@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
-import { requireAdminOrRedirect } from "@/features/google/route-guard";
+import { requireCapabilityOrRedirect } from "@/features/google/route-guard";
 import { buildAuthUrl, googleIsConfigured } from "@/features/google/oauth";
 
 export const STATE_COOKIE = "google_oauth_state";
 
 /** Inicia o fluxo: manda o usuário pra tela de consentimento do Google. */
 export async function GET() {
-  await requireAdminOrRedirect("/dashboard/settings");
+  await requireCapabilityOrRedirect("appointments.manage", "/dashboard/settings");
 
   if (!googleIsConfigured()) {
     redirect("/dashboard/settings?erro=google_nao_configurado");
