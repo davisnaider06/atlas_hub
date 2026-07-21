@@ -10,6 +10,7 @@ import {
   IconHelp,
   IconPipeline,
   IconSchedule,
+  IconSettings,
 } from "@/components/ui/icons";
 
 type NavItem = {
@@ -26,14 +27,16 @@ const sections: { title: string; items: NavItem[] }[] = [
       { href: "/dashboard", label: "Painel", icon: IconGrid },
       { href: "/dashboard/contacts", label: "Contatos", icon: IconContacts },
       { href: "/dashboard/pipeline", label: "Pipeline", icon: IconPipeline },
+      { href: "/dashboard/appointments", label: "Agendamentos", icon: IconSchedule },
     ],
   },
   {
     title: "Em breve",
-    items: [
-      { href: "#", label: "Agendamentos", icon: IconSchedule, soon: true },
-      { href: "#", label: "Documentos", icon: IconDocuments, soon: true },
-    ],
+    items: [{ href: "#", label: "Documentos", icon: IconDocuments, soon: true }],
+  },
+  {
+    title: "Conta",
+    items: [{ href: "/dashboard/settings", label: "Configurações", icon: IconSettings }],
   },
 ];
 

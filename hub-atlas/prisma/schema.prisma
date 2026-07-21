@@ -30,6 +30,37 @@ model User {
   contact   Contact?      @relation(fields: [contactId], references: [id])
   contactId String?       @unique
   documents Document[]
+
+  // agendamentos em que este usuário é o atendente
+  appointments Appointment[]
+
+  googleAccount GoogleAccount?
+}
+
+// Conexão OAuth de um membro do time com o Google Calendar.
+//
+// É por usuário (e não uma service account) porque a Atlas usa contas Gmail
+// comuns, sem Google Workspace — então não há domain-wide delegation possível.
+// Cada atendente conecta a própria agenda.
+model GoogleAccount {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // email da conta Google conectada (pode diferir do email do Clerk)
+  googleEmail String
+
+  // agenda onde os eventos são criados; "primary" é a agenda principal
+  calendarId String @default("primary")
+
+  accessToken  String
+  refreshToken String
+  // quando o accessToken expira; usamos o refreshToken pra renovar
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Coluna do kanban do pipeline de CRM.
@@ -70,21 +101,31 @@ enum AppointmentStatus {
 }
 
 model Appointment {
-  id               String            @id @default(cuid())
-  title            String
-  startsAt         DateTime
-  endsAt           DateTime
-  status           AppointmentStatus @default(SCHEDULED)
-  calComBookingUid String?
-  notes            String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id        String            @id @default(cuid())
+  title     String
+  startsAt  DateTime
+  endsAt    DateTime
+  status    AppointmentStatus @default(SCHEDULED)
+  notes     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 
+  // cliente atendido
   contactId String
   contact   Contact @relation(fields: [contactId], references: [id])
 
+  // atendente: é na agenda do Google DELE que o evento é criado
+  assignedToId String
+  assignedTo   User   @relation(fields: [assignedToId], references: [id])
+
+  // preenchidos quando o evento é espelhado no Google Calendar (Fase C).
+  // Nulos = agendamento existe só no Hub.
+  googleEventId    String?
+  googleCalendarId String?
+
   @@index([contactId])
   @@index([startsAt])
+  @@index([assignedToId])
 }
 
 model Document {
