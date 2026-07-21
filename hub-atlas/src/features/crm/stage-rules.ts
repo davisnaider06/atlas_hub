@@ -1,20 +1,10 @@
 import { prisma } from "@/lib/prisma";
+import { ehEstagioGanho } from "./stage-utils";
 
 /**
- * Um contato vira CLIENT ao entrar no estágio de "Fechado - Ganho", e volta a
- * LEAD se sair dele (negócio reaberto).
- *
- * A detecção é por nome do estágio porque os estágios são dados (vêm do seed e
- * podem ser renomeados), não código. Casa "ganho" mas não "perdido".
+ * Regras de estágio que TOCAM O BANCO. Só pode ser importado de código de
+ * servidor — a parte pura vive em `stage-utils.ts`, que o cliente pode usar.
  */
-export function ehEstagioGanho(nome: string) {
-  // NFD separa o acento da letra; o range remove os acentos soltos
-  const normalizado = nome
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-  return normalizado.includes("ganho") && !normalizado.includes("perdid");
-}
 
 /** Descobre o tipo correto do contato a partir do estágio em que ele está. */
 export async function tipoParaEstagio(stageId: string) {

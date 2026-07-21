@@ -4,7 +4,7 @@ import { useState } from "react";
 import { buttonClasses } from "@/components/ui/button";
 import { fieldClasses } from "@/components/ui/field";
 import { centavosParaInput } from "./money";
-import { ehEstagioGanho } from "./stage-rules";
+import { ehEstagioGanho } from "./stage-utils";
 import type { ContactWithStage, StageOption } from "./queries";
 import type { ServiceOption } from "@/features/services/queries";
 
