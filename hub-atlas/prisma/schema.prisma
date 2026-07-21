@@ -13,17 +13,29 @@ datasource db {
 }
 
 enum Role {
+  /// Sócio: acesso total, incluindo gerenciar a equipe.
+  OWNER
+  /// Administrador: opera o CRM e o catálogo, mas não mexe na equipe.
   ADMIN
+  /// Colaborador: trabalha leads e agendamentos, sem acesso a serviços/equipe.
+  MEMBER
+  /// Cliente: só o portal.
   CLIENT
 }
 
 // Sincronizado com o Clerk via webhook (clerkId = user id do Clerk).
+//
+// `clerkId` é opcional pra permitir PRÉ-CADASTRO: o sócio cadastra a pessoa na
+// tela de Equipe com email e papel antes dela existir; no primeiro login o
+// registro é casado por email e o clerkId preenchido.
 model User {
   id        String   @id @default(cuid())
-  clerkId   String   @unique
+  clerkId   String?  @unique
   email     String   @unique
   name      String?
   role      Role     @default(CLIENT)
+  /// Quem convidou; nulo para quem entrou sozinho pelo cadastro público.
+  invitedBy String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

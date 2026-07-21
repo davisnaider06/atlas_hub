@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/features/auth/current-user";
+import { requireCapability } from "@/features/auth/current-user";
 import { paraCentavos } from "@/features/crm/money";
 
 function optionalString(value: FormDataEntryValue | null) {
@@ -39,7 +39,7 @@ function revalidar(id?: string) {
 }
 
 export async function createService(formData: FormData) {
-  await requireAdmin();
+  await requireCapability("services.manage");
   const data = dadosDoForm(formData);
   await prisma.service.create({ data });
   revalidar();
@@ -47,7 +47,7 @@ export async function createService(formData: FormData) {
 }
 
 export async function updateService(id: string, formData: FormData) {
-  await requireAdmin();
+  await requireCapability("services.manage");
   const data = dadosDoForm(formData);
   await prisma.service.update({ where: { id }, data });
   revalidar(id);
@@ -59,7 +59,7 @@ export async function updateService(id: string, formData: FormData) {
  * (ON DELETE SET NULL) — o histórico do cliente não é perdido.
  */
 export async function deleteService(id: string) {
-  await requireAdmin();
+  await requireCapability("services.manage");
   await prisma.service.delete({ where: { id } });
   revalidar();
   redirect("/dashboard/services");

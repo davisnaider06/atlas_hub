@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { Capability } from "@/features/auth/permissions";
 import {
   IconChevronLeft,
   IconClients,
@@ -13,6 +14,7 @@ import {
   IconSchedule,
   IconServices,
   IconSettings,
+  IconTeam,
 } from "@/components/ui/icons";
 
 type NavItem = {
@@ -20,6 +22,8 @@ type NavItem = {
   label: string;
   icon: typeof IconGrid;
   soon?: boolean;
+  /** se definida, o item só aparece pra quem tem a capacidade */
+  cap?: Capability;
 };
 
 const sections: { title: string; items: NavItem[] }[] = [
@@ -35,7 +39,14 @@ const sections: { title: string; items: NavItem[] }[] = [
   },
   {
     title: "Catálogo",
-    items: [{ href: "/dashboard/services", label: "Serviços", icon: IconServices }],
+    items: [
+      {
+        href: "/dashboard/services",
+        label: "Serviços",
+        icon: IconServices,
+        cap: "services.manage",
+      },
+    ],
   },
   {
     title: "Em breve",
@@ -43,7 +54,15 @@ const sections: { title: string; items: NavItem[] }[] = [
   },
   {
     title: "Conta",
-    items: [{ href: "/dashboard/settings", label: "Configurações", icon: IconSettings }],
+    items: [
+      {
+        href: "/dashboard/team",
+        label: "Equipe",
+        icon: IconTeam,
+        cap: "team.manage",
+      },
+      { href: "/dashboard/settings", label: "Configurações", icon: IconSettings },
+    ],
   },
 ];
 
@@ -59,7 +78,7 @@ function toggleSidebar() {
   }
 }
 
-export function Sidebar() {
+export function Sidebar({ caps }: { caps: Capability[] }) {
   const pathname = usePathname();
 
   function isActive(href: string) {
@@ -99,7 +118,13 @@ export function Sidebar() {
 
       {/* navegação */}
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-2">
-        {sections.map((section) => (
+        {sections
+          .map((section) => ({
+            ...section,
+            items: section.items.filter((i) => !i.cap || caps.includes(i.cap)),
+          }))
+          .filter((section) => section.items.length > 0)
+          .map((section) => (
           <div key={section.title}>
             <p className="px-2 pb-2 text-[0.65rem] font-medium uppercase tracking-wider text-subtle collapsed:hidden">
               {section.title}
