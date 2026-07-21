@@ -47,6 +47,7 @@ model User {
   appointments Appointment[]
 
   googleAccount GoogleAccount?
+  tasks         Task[]
 }
 
 // Conexão OAuth de um membro do time com o Google Calendar.
@@ -136,6 +137,7 @@ model Contact {
 
   user         User?
   appointments Appointment[]
+  tasks        Task[]
   documents    Document[]
 
   @@index([stageId])
@@ -175,6 +177,48 @@ model Appointment {
   @@index([contactId])
   @@index([startsAt])
   @@index([assignedToId])
+}
+
+enum TaskStatus {
+  PENDING
+  DONE
+}
+
+enum TaskKind {
+  /// Retomar contato com um lead parado
+  FOLLOW_UP
+  /// Ligar / mandar mensagem
+  CALL
+  /// Enviar proposta
+  PROPOSAL
+  /// Tarefa livre
+  OTHER
+}
+
+/// Tarefa da rotina diária de um membro do time.
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  kind        TaskKind   @default(OTHER)
+  status      TaskStatus @default(PENDING)
+  /// Data em que a tarefa deve ser feita (usada pra montar a rotina do dia).
+  dueAt       DateTime
+  doneAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Responsável pela tarefa.
+  assignedToId String
+  assignedTo   User   @relation(fields: [assignedToId], references: [id], onDelete: Cascade)
+
+  /// Lead/cliente relacionado, quando houver.
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([assignedToId, status, dueAt])
+  @@index([contactId])
 }
 
 model Document {

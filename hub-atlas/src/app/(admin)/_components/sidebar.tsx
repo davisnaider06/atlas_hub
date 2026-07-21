@@ -11,6 +11,7 @@ import {
   IconGrid,
   IconHelp,
   IconPipeline,
+  IconRoutine,
   IconSchedule,
   IconServices,
   IconSettings,
@@ -31,6 +32,7 @@ const sections: { title: string; items: NavItem[] }[] = [
     title: "Comercial",
     items: [
       { href: "/dashboard", label: "Painel", icon: IconGrid },
+      { href: "/dashboard/routine", label: "Rotina", icon: IconRoutine },
       { href: "/dashboard/leads", label: "Leads", icon: IconContacts },
       { href: "/dashboard/clients", label: "Clientes", icon: IconClients },
       { href: "/dashboard/pipeline", label: "Pipeline", icon: IconPipeline },

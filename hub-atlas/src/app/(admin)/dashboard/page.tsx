@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { getDashboardData } from "@/features/dashboard/queries";
+import { getCurrentUser } from "@/features/auth/current-user";
+import { getRoutine } from "@/features/routine/queries";
+import { RoutineModal } from "@/features/routine/routine-modal";
 import { ContactsChart } from "@/features/dashboard/contacts-chart";
 import { Card, CardHeading, DeltaChip } from "@/components/ui/card";
 import { CountUp } from "@/components/ui/count-up";
@@ -15,11 +18,13 @@ function iniciais(nome: string) {
 }
 
 export default async function AdminDashboardPage() {
-  const d = await getDashboardData();
+  const [d, eu] = await Promise.all([getDashboardData(), getCurrentUser()]);
+  const routine = eu ? await getRoutine(eu.id) : null;
   const maiorEstagio = Math.max(1, ...d.stages.map((s) => s._count.contacts));
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-5">
+      {routine && eu && <RoutineModal routine={routine} nome={eu.name} />}
       {/* cabeçalho da página */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
