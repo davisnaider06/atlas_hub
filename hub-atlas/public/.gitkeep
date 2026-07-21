@@ -1,0 +1,5 @@
+# Mantém a pasta no versionamento.
+#
+# O git não versiona diretórios vazios, e o Dockerfile faz `COPY /app/public`.
+# Sem este arquivo o build quebra em máquinas limpas (foi o que aconteceu no
+# deploy quando os SVGs do template foram removidos).
