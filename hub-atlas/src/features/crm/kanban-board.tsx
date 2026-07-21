@@ -27,10 +27,21 @@ function moveContactInBoard(
   );
 }
 
+function iniciais(nome: string) {
+  return nome
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
 export function KanbanBoard({ stages: initialStages }: { stages: PipelineBoard }) {
   const [stages, setStages] = useState(initialStages);
   const [, startTransition] = useTransition();
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  // coluna sob o cursor, pra dar feedback de onde vai cair
+  const [overStageId, setOverStageId] = useState<string | null>(null);
 
   function handleDrop(targetStageId: string, contactId: string) {
     setStages((prev) => moveContactInBoard(prev, contactId, targetStageId));
@@ -41,46 +52,79 @@ export function KanbanBoard({ stages: initialStages }: { stages: PipelineBoard }
 
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
-      {stages.map((stage) => (
-        <div
-          key={stage.id}
-          className="flex w-72 shrink-0 flex-col rounded-lg bg-zinc-100 dark:bg-zinc-900"
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={(event) => {
-            event.preventDefault();
-            const contactId = event.dataTransfer.getData("text/contact-id");
-            if (contactId) handleDrop(stage.id, contactId);
-            setDraggingId(null);
-          }}
-        >
-          <div className="flex items-center justify-between border-b border-zinc-200 px-3 py-2 dark:border-zinc-800">
-            <h2 className="text-sm font-medium">{stage.name}</h2>
-            <span className="text-xs text-zinc-500">{stage.contacts.length}</span>
+      {stages.map((stage) => {
+        const ativo = overStageId === stage.id;
+        return (
+          <div
+            key={stage.id}
+            className={`glass-panel flex w-72 shrink-0 flex-col rounded-2xl transition-colors ${
+              ativo ? "border-brand-border bg-brand-subtle/40" : ""
+            }`}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setOverStageId(stage.id);
+            }}
+            onDragLeave={() => setOverStageId((id) => (id === stage.id ? null : id))}
+            onDrop={(event) => {
+              event.preventDefault();
+              const contactId = event.dataTransfer.getData("text/contact-id");
+              if (contactId) handleDrop(stage.id, contactId);
+              setDraggingId(null);
+              setOverStageId(null);
+            }}
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+              <h2 className="truncate text-sm font-semibold tracking-tight">
+                {stage.name}
+              </h2>
+              <span className="shrink-0 rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-medium tabular-nums text-muted">
+                {stage.contacts.length}
+              </span>
+            </div>
+
+            <div className="flex min-h-28 flex-col gap-2 p-2.5">
+              {stage.contacts.length === 0 ? (
+                <p className="px-2 py-6 text-center text-xs text-subtle">
+                  Arraste um contato pra cá
+                </p>
+              ) : (
+                stage.contacts.map((contact) => (
+                  <Link
+                    key={contact.id}
+                    href={`/dashboard/contacts/${contact.id}`}
+                    draggable
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData("text/contact-id", contact.id);
+                      setDraggingId(contact.id);
+                    }}
+                    onDragEnd={() => {
+                      setDraggingId(null);
+                      setOverStageId(null);
+                    }}
+                    className={`flex cursor-grab items-center gap-2.5 rounded-xl border border-border bg-surface-raised/80 p-2.5 transition-all hover:border-border-strong active:cursor-grabbing ${
+                      draggingId === contact.id ? "opacity-40" : ""
+                    }`}
+                  >
+                    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface-sunken text-[0.65rem] font-semibold text-muted">
+                      {iniciais(contact.name)}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-text">
+                        {contact.name}
+                      </span>
+                      {contact.company && (
+                        <span className="block truncate text-xs text-subtle">
+                          {contact.company}
+                        </span>
+                      )}
+                    </span>
+                  </Link>
+                ))
+              )}
+            </div>
           </div>
-          <div className="flex min-h-24 flex-col gap-2 p-2">
-            {stage.contacts.map((contact) => (
-              <Link
-                key={contact.id}
-                href={`/dashboard/contacts/${contact.id}`}
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.setData("text/contact-id", contact.id);
-                  setDraggingId(contact.id);
-                }}
-                onDragEnd={() => setDraggingId(null)}
-                className={`rounded-md border border-zinc-200 bg-white p-3 text-sm shadow-sm transition-opacity hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 ${
-                  draggingId === contact.id ? "opacity-50" : ""
-                }`}
-              >
-                <p className="font-medium text-zinc-900 dark:text-zinc-50">{contact.name}</p>
-                {contact.company && (
-                  <p className="text-xs text-zinc-500">{contact.company}</p>
-                )}
-              </Link>
-            ))}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

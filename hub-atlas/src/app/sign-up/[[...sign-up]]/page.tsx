@@ -1,9 +1,19 @@
+import Link from "next/link";
 import { SignUp } from "@clerk/nextjs";
 
 export default function SignUpPage() {
   return (
-    <div className="flex flex-1 items-center justify-center py-12">
-      <SignUp />
+    <div className="flex flex-1 flex-col items-center justify-center px-5 py-12">
+      <Link href="/" className="mb-6 flex items-center gap-2.5">
+        <span className="grid size-9 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
+          A
+        </span>
+        <span className="text-base font-semibold tracking-tight">Hub Atlas</span>
+      </Link>
+
+      <div className="glass-panel rounded-2xl p-2">
+        <SignUp />
+      </div>
     </div>
   );
 }

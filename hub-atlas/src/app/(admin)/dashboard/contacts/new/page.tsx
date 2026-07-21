@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { IconChevronLeft } from "@/components/ui/icons";
 import { createContact } from "@/features/crm/actions";
 import { ContactForm } from "@/features/crm/contact-form";
 import { getPipelineStages } from "@/features/crm/queries";
@@ -7,15 +9,25 @@ export default async function NewContactPage() {
   const stages = await getPipelineStages();
 
   return (
-    <main className="p-8">
+    <div className="mx-auto max-w-3xl space-y-5">
       <Link
         href="/dashboard/contacts"
-        className="mb-4 inline-block text-sm text-zinc-500 hover:underline"
+        className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-text"
       >
-        ← Voltar para contatos
+        <IconChevronLeft className="size-4" />
+        Voltar para contatos
       </Link>
-      <h1 className="mb-6 text-2xl font-semibold">Novo contato</h1>
-      <ContactForm action={createContact} stages={stages} submitLabel="Criar contato" />
-    </main>
+
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Novo contato</h1>
+        <p className="mt-1 text-sm text-muted">
+          Preencha os dados e escolha em qual estágio do funil ele entra.
+        </p>
+      </div>
+
+      <Card className="p-5">
+        <ContactForm action={createContact} stages={stages} submitLabel="Criar contato" />
+      </Card>
+    </div>
   );
 }

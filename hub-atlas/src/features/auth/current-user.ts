@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
@@ -5,7 +6,9 @@ import { prisma } from "@/lib/prisma";
 // pra manter o User sincronizado, mas ele só é alcançável quando a app tem uma
 // URL pública (deploy). Em dev local o Clerk não consegue chamar localhost, então
 // criamos o registro on-demand aqui no primeiro acesso autenticado.
-export async function getCurrentUser() {
+// `cache` memoiza por requisição: layout, página e server actions podem chamar
+// à vontade que o banco só é consultado uma vez por request.
+export const getCurrentUser = cache(async () => {
   const { userId } = await auth();
   if (!userId) return null;
 
@@ -28,7 +31,7 @@ export async function getCurrentUser() {
     create: { clerkId: userId, email, name, role },
     update: { email, name, role },
   });
-}
+});
 
 // Server Functions são alcançáveis por POST direto, não só pela UI protegida
 // pelo layout — todo mutation de admin precisa checar o role de novo aqui.
