@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { clerkAppearance } from "@/components/ui/clerk-appearance";
+import { ServiceWorkerRegistrar } from "@/components/ui/service-worker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,6 +19,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Hub Atlas",
   description: "Hub interno da Atlas: CRM, agendamentos e documentos.",
+  applicationName: "Hub Atlas",
+  // iOS não lê o manifest: precisa destas meta tags pra abrir em tela cheia
+  appleWebApp: {
+    capable: true,
+    title: "Atlas",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  // acompanha o tema: a barra do sistema muda junto com o toggle
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fbf9f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0705" },
+  ],
+  // respeita a área segura do notch quando instalado no iPhone
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -43,6 +62,7 @@ export default function RootLayout({
             {`(function(){var d=document.documentElement;try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}d.setAttribute("data-theme",t);if(localStorage.getItem("sidebar")==="collapsed"){d.setAttribute("data-sidebar","collapsed")}}catch(e){d.setAttribute("data-theme","dark")}})()`}
           </Script>
           {children}
+          <ServiceWorkerRegistrar />
         </body>
       </html>
     </ClerkProvider>

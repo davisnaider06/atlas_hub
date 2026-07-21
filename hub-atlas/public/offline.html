@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sem conexão · Hub Atlas</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #0a0705;
+        color: #f6f2ef;
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        text-align: center;
+      }
+      /* mesmo brilho quente do app, pra a tela de offline não parecer outro produto */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: -20% -10% auto -10%;
+        height: 60vh;
+        background: radial-gradient(
+          55% 50% at 60% 6%,
+          rgb(255 107 44 / 0.35),
+          transparent 70%
+        );
+        filter: blur(40px);
+        z-index: -1;
+      }
+      .marca {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 20px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: #ff6b2c;
+        color: #150d08;
+        font-size: 26px;
+        font-weight: 700;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 0 auto 24px;
+        max-width: 34ch;
+        line-height: 1.6;
+        color: #a2968c;
+        font-size: 15px;
+      }
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 11px 22px;
+        background: #ff6b2c;
+        color: #150d08;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #ff8149;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="marca">A</div>
+      <h1>Sem conexão</h1>
+      <p>
+        O Hub Atlas precisa de internet para mostrar dados atualizados. Assim que a
+        conexão voltar, é só recarregar.
+      </p>
+      <button onclick="location.reload()">Tentar de novo</button>
+    </main>
+  </body>
+</html>
