@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/field";
 import { buttonClasses } from "@/components/ui/button";
-import { IconChevronLeft, IconChevronRight, IconPlus } from "@/components/ui/icons";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPencil,
+  IconPlus,
+  IconTrash,
+} from "@/components/ui/icons";
+import { deleteAppointment } from "./actions";
 import { agruparPorDia, chaveDoDia, gerarGrade, mesmoDia } from "./calendar-utils";
 import type { AppointmentListItem } from "./queries";
 
@@ -200,14 +207,22 @@ export function CalendarView({ appointments }: { appointments: AppointmentListIt
               <div>
                 <dt className="text-xs text-subtle">Cliente</dt>
                 <dd className="mt-0.5 text-sm font-medium">
-                  {selecionado.contact.name}
-                  {selecionado.contact.company ? ` · ${selecionado.contact.company}` : ""}
+                  {selecionado.contact ? (
+                    <>
+                      {selecionado.contact.name}
+                      {selecionado.contact.company
+                        ? ` · ${selecionado.contact.company}`
+                        : ""}
+                    </>
+                  ) : (
+                    <span className="text-muted">Sem cliente vinculado</span>
+                  )}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-subtle">Email do cliente</dt>
                 <dd className="mt-0.5 truncate text-sm font-medium">
-                  {selecionado.contact.email ?? "—"}
+                  {selecionado.contact?.email ?? "—"}
                 </dd>
               </div>
               <div>
@@ -218,17 +233,37 @@ export function CalendarView({ appointments }: { appointments: AppointmentListIt
               </div>
             </dl>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-wrap items-center gap-2">
               <Link
                 href={`/dashboard/appointments/${selecionado.id}`}
                 className={buttonClasses("primary")}
               >
-                Abrir detalhes
+                <IconPencil className="size-4" />
+                Editar
               </Link>
+
+              <form
+                action={deleteAppointment.bind(null, selecionado.id)}
+                onSubmit={(e) => {
+                  if (
+                    !confirm(
+                      `Excluir "${selecionado.title}"? Isso remove também do Google Calendar.`,
+                    )
+                  ) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                <button type="submit" className={buttonClasses("danger")}>
+                  <IconTrash className="size-4" />
+                  Excluir
+                </button>
+              </form>
+
               <button
                 type="button"
                 onClick={() => setSelecionado(null)}
-                className={buttonClasses("secondary")}
+                className={buttonClasses("ghost", "ml-auto")}
               >
                 Fechar
               </button>

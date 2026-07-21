@@ -52,18 +52,15 @@ export function AppointmentForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label className={labelClasses} htmlFor="contactId">
-            Cliente <span className="text-brand">*</span>
+            Cliente
           </label>
           <select
             id="contactId"
             name="contactId"
-            required
             defaultValue={defaultValues?.contactId ?? ""}
             className={fieldClasses}
           >
-            <option value="" disabled>
-              Selecione um contato
-            </option>
+            <option value="">Sem cliente vinculado</option>
             {contacts.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}

@@ -4,6 +4,9 @@ import { Card, CardHeading } from "@/components/ui/card";
 import { Badge, EmptyState } from "@/components/ui/field";
 import { IconPlus, IconSchedule } from "@/components/ui/icons";
 import { CalendarView } from "@/features/appointments/calendar-view";
+import { SyncOnOpen } from "@/features/google/sync-on-open";
+import { getCurrentUser } from "@/features/auth/current-user";
+import { prisma } from "@/lib/prisma";
 import {
   getAppointmentsAroundNow,
   getPastAppointments,
@@ -46,7 +49,7 @@ function LinhaAgendamento({ a }: { a: AppointmentListItem }) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{a.title}</p>
           <p className="truncate text-xs text-subtle">
-            {a.contact.name}
+            {a.contact?.name ?? "Sem cliente"}
             {a.assignedTo ? ` · com ${a.assignedTo.name ?? a.assignedTo.email}` : ""}
           </p>
         </div>
@@ -68,6 +71,11 @@ export default async function AppointmentsPage({
   const { vis } = await searchParams;
   const modoLista = vis === "lista";
 
+  const user = await getCurrentUser();
+  const contaGoogle = user
+    ? await prisma.googleAccount.findUnique({ where: { userId: user.id } })
+    : null;
+
   // busca só o que a visão atual precisa
   const [doCalendario, proximos, passados] = await Promise.all([
     modoLista ? Promise.resolve([]) : getAppointmentsAroundNow(),
@@ -81,8 +89,11 @@ export default async function AppointmentsPage({
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Agendamentos</h1>
           <p className="mt-1 text-sm text-muted">
-            Suas reuniões com clientes, sincronizadas com o Google Calendar.
+            {contaGoogle
+              ? "Sincronizado nos dois sentidos com a agenda Atlas Agendamentos."
+              : "Conecte o Google Calendar em Configurações para sincronizar."}
           </p>
+          <SyncOnOpen conectado={Boolean(contaGoogle)} />
         </div>
 
         <div className="flex items-center gap-2">

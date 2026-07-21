@@ -1,12 +1,16 @@
 type CardProps = {
   className?: string;
+  /** usado pra escalonar a animação de entrada (animationDelay) */
+  style?: React.CSSProperties;
   children: React.ReactNode;
 };
 
 /** Painel de vidro — base de todos os blocos do painel. */
-export function Card({ className = "", children }: CardProps) {
+export function Card({ className = "", style, children }: CardProps) {
   return (
-    <div className={`glass-panel rounded-2xl ${className}`}>{children}</div>
+    <div className={`glass-panel rounded-2xl ${className}`} style={style}>
+      {children}
+    </div>
   );
 }
 

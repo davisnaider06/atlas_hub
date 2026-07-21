@@ -83,18 +83,22 @@ export default async function AppointmentPage({
           <div>
             <dt className="text-xs text-subtle">Cliente</dt>
             <dd className="mt-0.5 truncate text-sm font-medium">
-              <Link
-                href={`/dashboard/contacts/${appointment.contact.id}`}
-                className="hover:text-brand"
-              >
-                {appointment.contact.name}
-              </Link>
+              {appointment.contact ? (
+                <Link
+                  href={`/dashboard/contacts/${appointment.contact.id}`}
+                  className="hover:text-brand"
+                >
+                  {appointment.contact.name}
+                </Link>
+              ) : (
+                <span className="text-muted">Sem cliente vinculado</span>
+              )}
             </dd>
           </div>
           <div>
             <dt className="text-xs text-subtle">Email do cliente</dt>
             <dd className="mt-0.5 truncate text-sm font-medium">
-              {appointment.contact.email ?? "—"}
+              {appointment.contact?.email ?? "—"}
             </dd>
           </div>
           <div>

@@ -22,7 +22,8 @@ function requiredString(value: FormDataEntryValue | null, campo: string) {
 
 function appointmentDataFromForm(formData: FormData) {
   const title = requiredString(formData.get("title"), "Título");
-  const contactId = requiredString(formData.get("contactId"), "Contato");
+  // opcional: eventos vindos do Google podem não ter cliente vinculado
+  const contactId = optionalString(formData.get("contactId"));
   const assignedToId = requiredString(formData.get("assignedToId"), "Atendente");
   const startsAtRaw = requiredString(formData.get("startsAt"), "Início");
   const duracao = Number(formData.get("durationMinutes") ?? 60);

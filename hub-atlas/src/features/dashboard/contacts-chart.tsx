@@ -35,6 +35,11 @@ function ChartTooltip({
 }
 
 export function ContactsChart({ data }: { data: SeriePonto[] }) {
+  // quem pediu menos movimento no sistema vê o gráfico já desenhado
+  const semMovimento =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   return (
     <div className="h-56 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -76,6 +81,11 @@ export function ContactsChart({ data }: { data: SeriePonto[] }) {
             stroke="var(--brand)"
             strokeWidth={2}
             fill="url(#grad-contatos)"
+            // desenha da esquerda pra direita na entrada, junto com os cards
+            isAnimationActive={!semMovimento}
+            animationBegin={240}
+            animationDuration={1200}
+            animationEasing="ease-out"
             activeDot={{
               r: 4,
               fill: "var(--brand)",

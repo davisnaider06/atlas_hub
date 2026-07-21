@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDashboardData } from "@/features/dashboard/queries";
 import { ContactsChart } from "@/features/dashboard/contacts-chart";
 import { Card, CardHeading, DeltaChip } from "@/components/ui/card";
+import { CountUp } from "@/components/ui/count-up";
 import { IconContacts, IconPlus, IconTrendUp } from "@/components/ui/icons";
 
 function iniciais(nome: string) {
@@ -39,12 +40,15 @@ export default async function AdminDashboardPage() {
       {/* linha 1 */}
       <div className="grid gap-5 lg:grid-cols-3">
         {/* conversão */}
-        <Card className="p-5">
+        <Card className="anima-entrada p-5">
           <CardHeading label="Funil" title="Taxa de conversão" />
           <div className="mt-5 flex items-end gap-3">
-            <span className="text-4xl font-semibold tracking-tight tabular-nums">
-              {d.conversao.toFixed(1)}%
-            </span>
+            <CountUp
+              value={d.conversao}
+              decimals={1}
+              suffix="%"
+              className="text-4xl font-semibold tracking-tight tabular-nums"
+            />
             <span className="mb-1.5">
               <DeltaChip value={d.variacao} />
             </span>
@@ -56,14 +60,14 @@ export default async function AdminDashboardPage() {
           {/* barra de progresso do funil */}
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-surface-sunken">
             <div
-              className="h-full rounded-full bg-brand transition-[width] duration-500"
+              className="anima-barra h-full rounded-full bg-brand"
               style={{ width: `${Math.min(100, d.conversao)}%` }}
             />
           </div>
         </Card>
 
         {/* atividade recente */}
-        <Card className="p-5">
+        <Card className="anima-entrada p-5" style={{ animationDelay: "80ms" }}>
           <CardHeading
             label="Últimos cadastros"
             title="Atividade recente"
@@ -82,8 +86,12 @@ export default async function AdminDashboardPage() {
                 Nenhum contato ainda.
               </li>
             ) : (
-              d.recentes.map((c) => (
-                <li key={c.id}>
+              d.recentes.map((c, i) => (
+                <li
+                  key={c.id}
+                  className="anima-entrada"
+                  style={{ animationDelay: `${140 + i * 70}ms` }}
+                >
                   <Link
                     href={`/dashboard/contacts/${c.id}`}
                     className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-surface-hover"
@@ -108,24 +116,27 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* distribuição do funil */}
-        <Card className="p-5">
+        <Card className="anima-entrada p-5" style={{ animationDelay: "160ms" }}>
           <CardHeading label="Distribuição" title="Contatos por estágio" />
           <ul className="mt-4 space-y-3">
-            {d.stages.map((s) => (
+            {d.stages.map((s, i) => (
               <li key={s.id}>
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="truncate text-muted">{s.name}</span>
-                  <span className="shrink-0 font-medium tabular-nums">
-                    {s._count.contacts}
-                  </span>
+                  <CountUp
+                    value={s._count.contacts}
+                    delay={200 + i * 60}
+                    className="shrink-0 font-medium tabular-nums"
+                  />
                 </div>
                 {/* magnitude por estágio: matiz único, intensidade proporcional */}
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
                   <div
-                    className="h-full rounded-full bg-brand"
+                    className="anima-barra h-full rounded-full bg-brand"
                     style={{
                       width: `${(s._count.contacts / maiorEstagio) * 100}%`,
                       opacity: 0.35 + (s._count.contacts / maiorEstagio) * 0.65,
+                      animationDelay: `${200 + i * 60}ms`,
                     }}
                   />
                 </div>
@@ -138,14 +149,16 @@ export default async function AdminDashboardPage() {
       {/* linha 2 */}
       <div className="grid gap-5 lg:grid-cols-3">
         {/* gráfico principal */}
-        <Card className="p-5 lg:col-span-2">
+        <Card className="anima-entrada p-5 lg:col-span-2" style={{ animationDelay: "240ms" }}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs text-subtle">Total de contatos</p>
               <div className="mt-1 flex items-end gap-3">
-                <span className="text-3xl font-semibold tracking-tight tabular-nums">
-                  {d.total}
-                </span>
+                <CountUp
+                  value={d.total}
+                  delay={240}
+                  className="text-3xl font-semibold tracking-tight tabular-nums"
+                />
                 <span className="mb-1">
                   <DeltaChip value={d.variacao} />
                 </span>
@@ -162,7 +175,10 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* card de destaque */}
-        <Card className="relative overflow-hidden p-5">
+        <Card
+          className="anima-entrada relative overflow-hidden p-5"
+          style={{ animationDelay: "320ms" }}
+        >
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-brand/25 blur-3xl"
@@ -171,9 +187,11 @@ export default async function AdminDashboardPage() {
             <IconTrendUp className="size-3.5" />
             Este mês
           </span>
-          <p className="mt-4 text-4xl font-semibold tracking-tight tabular-nums">
-            {d.mesAtual}
-          </p>
+          <CountUp
+            value={d.mesAtual}
+            delay={320}
+            className="mt-4 block text-4xl font-semibold tracking-tight tabular-nums"
+          />
           <p className="mt-1 text-sm text-muted">
             {d.mesAtual === 1 ? "novo contato" : "novos contatos"} entraram no funil
           </p>

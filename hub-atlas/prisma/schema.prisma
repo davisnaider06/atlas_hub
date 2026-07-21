@@ -51,8 +51,14 @@ model GoogleAccount {
   // email da conta Google conectada (pode diferir do email do Clerk)
   googleEmail String
 
-  // agenda onde os eventos são criados; "primary" é a agenda principal
-  calendarId String @default("primary")
+  // Agenda dedicada "Atlas Agendamentos". O Hub só lê e escreve nela — nunca
+  // na agenda pessoal, senão compromisso particular viraria lead no CRM.
+  // Fica nulo até a agenda ser criada/localizada no primeiro uso.
+  calendarId String?
+
+  // Token de sincronização incremental do Google: na próxima leitura ele
+  // devolve só o que mudou desde a última vez, em vez da agenda inteira.
+  syncToken String?
 
   accessToken  String
   refreshToken String
@@ -110,9 +116,10 @@ model Appointment {
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
-  // cliente atendido
-  contactId String
-  contact   Contact @relation(fields: [contactId], references: [id])
+  // Cliente atendido. Opcional porque um evento criado direto no Google pode
+  // não ter convidado que case com um Contact — ainda assim queremos importá-lo.
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
 
   // atendente: é na agenda do Google DELE que o evento é criado
   assignedToId String

@@ -27,6 +27,15 @@ export default async function PortalLayout({
           </Link>
 
           <div className="ml-auto flex items-center gap-2">
+            {/* admin cai no portal ao logar; sem isto ele fica sem caminho de volta */}
+            {dbUser.role === "ADMIN" && (
+              <Link
+                href="/dashboard"
+                className="rounded-full border border-border px-3 py-1.5 text-sm text-muted transition-colors hover:bg-surface-hover hover:text-text"
+              >
+                Ir para o painel
+              </Link>
+            )}
             <ThemeToggle />
             <div className="flex items-center rounded-full border border-border bg-surface/60 p-1">
               <UserButton />

@@ -11,8 +11,13 @@ import { prisma } from "@/lib/prisma";
 export const GOOGLE_SCOPES = [
   "openid",
   "email",
-  // só eventos: permite criar/editar/apagar sem dar leitura de tudo da agenda
-  "https://www.googleapis.com/auth/calendar.events",
+  // Precisa do escopo completo (e não só calendar.events) porque o Hub localiza
+  // e cria a agenda dedicada "Atlas Agendamentos" — listar/criar agendas não é
+  // permitido pelo escopo de eventos.
+  //
+  // O código nunca toca em outra agenda: todas as chamadas usam o calendarId
+  // dedicado guardado em GoogleAccount.
+  "https://www.googleapis.com/auth/calendar",
 ].join(" ");
 
 const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";

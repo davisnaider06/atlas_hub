@@ -181,6 +181,65 @@ body {
     0 12px 40px -12px rgb(0 0 0 / 0.55);
 }
 
+/* ---------------------------------------------------------------------------
+   ENTRADA ANIMADA (painel)
+   Cards sobem/aparecem em cascata; barras crescem da esquerda.
+   Tudo desligado sob prefers-reduced-motion.
+   --------------------------------------------------------------------------- */
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes crescer-barra {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* brilho que percorre o card uma vez, dando a sensação de "carregou agora" */
+@keyframes brilho-entrada {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@utility anima-entrada {
+  animation: surgir 0.75s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@utility anima-barra {
+  transform-origin: left;
+  animation: crescer-barra 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* aplicado nos cards: um véu laranja que some, reforçando a entrada */
+@utility anima-brilho {
+  position: relative;
+}
+@utility anima-brilho-veu {
+  animation: brilho-entrada 1.4s ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anima-entrada,
+  .anima-barra {
+    animation: none;
+  }
+}
+
 /* foco visível e consistente em tudo que é interativo */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--ring);
