@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCapability } from "@/features/auth/current-user";
+import { can, podeAcessarPainel } from "@/features/auth/permissions";
 
 /** Marca a tarefa como concluída (só o responsável pode). */
 export async function completeTask(taskId: string) {
@@ -37,6 +38,24 @@ export async function createTask(formData: FormData) {
     ? (kindRaw as "FOLLOW_UP" | "CALL" | "PROPOSAL" | "OTHER")
     : "OTHER";
 
+  // Responsável: por padrão quem está criando. Atribuir a OUTRA pessoa exige
+  // permissão — sem isso, qualquer colaborador criaria tarefa no nome dos
+  // colegas (o select escondido na UI não protege o endpoint).
+  const alvo = String(formData.get("assignedToId") ?? "").trim();
+  let assignedToId = user.id;
+
+  if (alvo && alvo !== user.id) {
+    if (!can(user.role, "tasks.assign")) {
+      throw new Error("Você não pode atribuir tarefas a outra pessoa");
+    }
+    const destinatario = await prisma.user.findUnique({ where: { id: alvo } });
+    if (!destinatario) throw new Error("Pessoa não encontrada");
+    if (!podeAcessarPainel(destinatario.role)) {
+      throw new Error("Essa pessoa não tem acesso ao painel");
+    }
+    assignedToId = alvo;
+  }
+
   await prisma.task.create({
     data: {
       title,
@@ -44,7 +63,7 @@ export async function createTask(formData: FormData) {
       kind,
       dueAt,
       contactId,
-      assignedToId: user.id,
+      assignedToId,
     },
   });
 

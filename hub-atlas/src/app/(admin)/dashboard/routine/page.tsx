@@ -5,8 +5,8 @@ import { Card, CardHeading } from "@/components/ui/card";
 import { Badge, EmptyState, fieldClasses } from "@/components/ui/field";
 import { IconContacts, IconPlus, IconSchedule } from "@/components/ui/icons";
 import { getCurrentUser } from "@/features/auth/current-user";
-import { can } from "@/features/auth/permissions";
-import { getRoutine } from "@/features/routine/queries";
+import { can, ROTULO_PAPEL } from "@/features/auth/permissions";
+import { getMembrosAtribuiveis, getRoutine } from "@/features/routine/queries";
 import { completeTask, createFollowUp, createTask } from "@/features/routine/actions";
 import { getContacts } from "@/features/crm/queries";
 
@@ -20,22 +20,79 @@ const ROTULO_TIPO: Record<string, string> = {
   OTHER: "Tarefa",
 };
 
-export default async function RoutinePage() {
+export default async function RoutinePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ membro?: string }>;
+}) {
   const eu = await getCurrentUser();
   if (!can(eu?.role, "crm.manage")) notFound();
 
-  const [routine, contatos] = await Promise.all([getRoutine(eu!.id), getContacts()]);
+  const podeAtribuir = can(eu!.role, "tasks.assign");
+  const { membro } = await searchParams;
+
+  // ver a rotina de outra pessoa exige permissão; sem ela, sempre a própria
+  const alvoId = podeAtribuir && membro ? membro : eu!.id;
+
+  const [routine, contatos, membros] = await Promise.all([
+    getRoutine(alvoId),
+    getContacts(),
+    podeAtribuir ? getMembrosAtribuiveis() : Promise.resolve([]),
+  ]);
+
+  const alvo = membros.find((m) => m.id === alvoId);
+  const vendoOutro = alvoId !== eu!.id;
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Rotina</h1>
-        <p className="mt-1 text-sm text-muted">
-          {routine.total === 0
-            ? "Tudo em dia por aqui."
-            : `${routine.total} ${routine.total === 1 ? "item pendente" : "itens pendentes"}.`}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {vendoOutro
+              ? `Rotina de ${alvo?.name ?? alvo?.email ?? "membro"}`
+              : "Minha rotina"}
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            {routine.total === 0
+              ? "Tudo em dia por aqui."
+              : `${routine.total} ${routine.total === 1 ? "item pendente" : "itens pendentes"}.`}
+          </p>
+        </div>
+
+        {/* trocar de pessoa (só quem pode atribuir) */}
+        {podeAtribuir && membros.length > 1 && (
+          <form className="flex items-center gap-2">
+            <label htmlFor="membro" className="text-xs text-subtle">
+              Ver rotina de
+            </label>
+            <select
+              id="membro"
+              name="membro"
+              defaultValue={alvoId}
+              className="rounded-lg border border-border bg-surface-sunken/60 px-2.5 py-1.5 text-sm"
+            >
+              {membros.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.id === eu!.id ? "Eu" : (m.name ?? m.email)}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted hover:bg-surface-hover hover:text-text"
+            >
+              Ver
+            </button>
+          </form>
+        )}
       </div>
+
+      {vendoOutro && (
+        <p className="rounded-xl border border-brand-border bg-brand-subtle/30 p-3 text-sm text-muted">
+          Você está vendo a rotina de outra pessoa. Só ela pode concluir as tarefas
+          dela — você pode criar novas abaixo.
+        </p>
+      )}
 
       {/* nova tarefa */}
       <Card className="p-5">
@@ -90,6 +147,31 @@ export default async function RoutinePage() {
               ))}
             </select>
           </div>
+
+          {/* responsável: só aparece pra quem pode atribuir a outra pessoa */}
+          {podeAtribuir && (
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-sm font-medium" htmlFor="assignedToId">
+                Responsável
+              </label>
+              <select
+                id="assignedToId"
+                name="assignedToId"
+                defaultValue={alvoId}
+                className={fieldClasses}
+              >
+                {membros.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.id === eu!.id ? "Eu" : (m.name ?? m.email)} ·{" "}
+                    {ROTULO_PAPEL[m.role]}
+                  </option>
+                ))}
+              </select>
+              <span className="mt-1.5 block text-xs text-subtle">
+                A tarefa aparece na rotina dessa pessoa quando ela entrar.
+              </span>
+            </div>
+          )}
           <div className="sm:col-span-6">
             <button type="submit" className={buttonClasses("primary")}>
               <IconPlus className="size-4" />
@@ -125,11 +207,13 @@ export default async function RoutinePage() {
                         {t.contact ? ` · ${t.contact.name}` : ""}
                       </p>
                     </div>
-                    <form action={completeTask.bind(null, t.id)}>
-                      <button type="submit" className={buttonClasses("secondary")}>
-                        Concluir
-                      </button>
-                    </form>
+                    {!vendoOutro && (
+                      <form action={completeTask.bind(null, t.id)}>
+                        <button type="submit" className={buttonClasses("secondary")}>
+                          Concluir
+                        </button>
+                      </form>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -183,11 +267,13 @@ export default async function RoutinePage() {
                         <p className="text-xs text-subtle">{t.contact.name}</p>
                       )}
                     </div>
-                    <form action={completeTask.bind(null, t.id)}>
-                      <button type="submit" className={buttonClasses("secondary")}>
-                        Concluir
-                      </button>
-                    </form>
+                    {!vendoOutro && (
+                      <form action={completeTask.bind(null, t.id)}>
+                        <button type="submit" className={buttonClasses("secondary")}>
+                          Concluir
+                        </button>
+                      </form>
+                    )}
                   </li>
                 ))}
               </ul>

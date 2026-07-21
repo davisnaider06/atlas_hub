@@ -84,3 +84,22 @@ export async function getRoutine(userId: string) {
 }
 
 export type Routine = Awaited<ReturnType<typeof getRoutine>>;
+
+/**
+ * Pessoas que podem receber tarefas (as que têm acesso ao painel).
+ *
+ * Fica aqui e não no arquivo de actions de propósito: exportar isto de um
+ * módulo "use server" o transformaria num endpoint POST alcançável de fora,
+ * expondo os emails da equipe.
+ */
+export function getMembrosAtribuiveis() {
+  return prisma.user.findMany({
+    where: { role: { in: ["OWNER", "ADMIN", "MEMBER"] } },
+    select: { id: true, name: true, email: true, role: true },
+    orderBy: [{ name: "asc" }, { email: "asc" }],
+  });
+}
+
+export type MembroAtribuivel = Awaited<
+  ReturnType<typeof getMembrosAtribuiveis>
+>[number];

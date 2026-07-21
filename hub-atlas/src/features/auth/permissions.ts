@@ -7,6 +7,7 @@ import type { Role } from "@/generated/prisma/enums";
  */
 export type Capability =
   | "team.manage" // convidar/remover pessoas e mudar papéis
+  | "tasks.assign" // criar tarefa NO NOME DE outra pessoa e ver a rotina dela
   | "services.manage" // catálogo de serviços
   | "crm.manage" // criar/editar/excluir leads e clientes
   | "crm.view"
@@ -16,6 +17,7 @@ export type Capability =
 const MATRIZ: Record<Role, Capability[]> = {
   OWNER: [
     "team.manage",
+    "tasks.assign",
     "services.manage",
     "crm.manage",
     "crm.view",
@@ -23,6 +25,7 @@ const MATRIZ: Record<Role, Capability[]> = {
     "dashboard.view",
   ],
   ADMIN: [
+    "tasks.assign",
     "services.manage",
     "crm.manage",
     "crm.view",
