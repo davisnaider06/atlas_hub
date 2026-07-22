@@ -62,13 +62,32 @@ export function getContactOptions() {
   });
 }
 
-/** Membros do time (admins) que podem ser atendentes. */
-export function getAttendantOptions() {
-  return prisma.user.findMany({
-    where: { role: "ADMIN" },
-    select: { id: true, name: true, email: true },
-    orderBy: { email: "asc" },
+/**
+ * Quem pode ser atendente: qualquer pessoa com acesso ao painel.
+ *
+ * Filtrar por role="ADMIN" deixava o sócio (OWNER) fora da lista, obrigando a
+ * escolher outra pessoa — e se ela não tivesse o Google conectado, o evento
+ * nunca chegava à agenda.
+ *
+ * Traz também se a pessoa conectou o Google, pra a tela avisar antes de criar
+ * em vez de falhar em silêncio depois.
+ */
+export async function getAttendantOptions() {
+  const membros = await prisma.user.findMany({
+    where: { role: { in: ["OWNER", "ADMIN", "MEMBER"] } },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      googleAccount: { select: { id: true } },
+    },
+    orderBy: [{ name: "asc" }, { email: "asc" }],
   });
+
+  return membros.map(({ googleAccount, ...m }) => ({
+    ...m,
+    temGoogle: googleAccount !== null,
+  }));
 }
 
 export type AppointmentListItem = Awaited<

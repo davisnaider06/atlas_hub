@@ -87,9 +87,16 @@ export function AppointmentForm({
             {attendants.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name ?? a.email}
+                {a.temGoogle ? "" : " — sem Google Calendar"}
               </option>
             ))}
           </select>
+          {attendants.some((a) => !a.temGoogle) && (
+            <span className="mt-1.5 block text-xs text-subtle">
+              Quem está &quot;sem Google Calendar&quot; recebe o agendamento no Hub, mas
+              o evento não vai para a agenda e o cliente não recebe convite.
+            </span>
+          )}
         </div>
       </div>
 
