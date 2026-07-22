@@ -3,8 +3,47 @@ import { getValidAccessToken } from "./oauth";
 
 const API = "https://www.googleapis.com/calendar/v3";
 
-/** Nome da agenda dedicada. O Hub só lê e escreve nela. */
+/** Nome da agenda dedicada criada pelo Hub quando não existe nenhuma. */
 export const NOME_AGENDA = "Atlas Agendamentos";
+
+/**
+ * Normaliza pra comparar nomes de agenda: sem acento, sem pontuação, sem
+ * espaço, tudo minúsculo.
+ *
+ * Sem isto, "ATLAS - AGENDAMENTOS" (criada à mão) não casaria com
+ * "Atlas Agendamentos" e o Hub criaria uma segunda agenda, ficando a olhar
+ * pra uma agenda vazia enquanto os eventos caem na outra.
+ */
+function normalizar(nome: string) {
+  return nome
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+const ALVO = normalizar(NOME_AGENDA);
+
+/** Lista as agendas em que o usuário pode criar eventos. */
+export async function listCalendars(userId: string) {
+  const token = await getValidAccessToken(userId);
+  if (!token) return [];
+
+  const res = await googleFetch(token, "/users/me/calendarList?maxResults=250");
+  if (!res.ok) return [];
+
+  const dados = (await res.json()) as {
+    items?: { id: string; summary?: string; accessRole?: string; primary?: boolean }[];
+  };
+
+  return (dados.items ?? [])
+    .filter((c) => c.accessRole === "owner" || c.accessRole === "writer")
+    .map((c) => ({
+      id: c.id,
+      nome: c.summary ?? c.id,
+      principal: Boolean(c.primary),
+    }));
+}
 
 type Agendamento = {
   id: string;
@@ -62,7 +101,10 @@ export async function ensureAtlasCalendar(userId: string): Promise<string | null
     const dados = (await lista.json()) as {
       items?: { id: string; summary?: string }[];
     };
-    const achada = dados.items?.find((c) => c.summary === NOME_AGENDA);
+    // comparação tolerante: casa "ATLAS - AGENDAMENTOS", "atlas agendamentos" etc.
+    const achada = dados.items?.find(
+      (c) => c.summary && normalizar(c.summary) === ALVO,
+    );
     if (achada) {
       await prisma.googleAccount.update({
         where: { userId },

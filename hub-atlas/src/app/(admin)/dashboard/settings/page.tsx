@@ -6,6 +6,8 @@ import { getCurrentUser } from "@/features/auth/current-user";
 import { prisma } from "@/lib/prisma";
 import { googleIsConfigured } from "@/features/google/oauth";
 import { disconnectGoogle } from "@/features/google/actions";
+import { listCalendars } from "@/features/google/calendar";
+import { CalendarSelect } from "@/features/google/calendar-select";
 
 const dataCurta = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
@@ -36,6 +38,8 @@ export default async function SettingsPage({
     ? await prisma.googleAccount.findUnique({ where: { userId: user.id } })
     : null;
   const configurado = googleIsConfigured();
+  // agendas do Google pra escolher qual sincronizar
+  const agendas = conta && user ? await listCalendars(user.id) : [];
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -97,6 +101,10 @@ export default async function SettingsPage({
               </button>
             </form>
           </div>
+        ) : null}
+
+        {conta ? (
+          <CalendarSelect agendas={agendas} atual={conta.calendarId} />
         ) : (
           <a href="/api/google/connect" className={buttonClasses("primary", "mt-4")}>
             <IconSchedule className="size-4" />
