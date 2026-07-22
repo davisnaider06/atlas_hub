@@ -111,11 +111,18 @@ export async function ensureAtlasCalendar(userId: string): Promise<string | null
   const lista = await googleFetch(token, "/users/me/calendarList?maxResults=250");
   if (lista.ok) {
     const dados = (await lista.json()) as {
-      items?: { id: string; summary?: string }[];
+      items?: { id: string; summary?: string; accessRole?: string }[];
     };
-    // comparação tolerante: casa "ATLAS - AGENDAMENTOS", "atlas agendamentos" etc.
+    // Comparação tolerante: casa "ATLAS - AGENDAMENTOS", "atlas agendamentos"...
+    //
+    // Exige poder ESCREVER: uma agenda compartilhada só para leitura aparece
+    // aqui igualzinho, e escolhê-la faria toda criação de evento falhar com um
+    // 403 sem explicação.
     const achada = dados.items?.find(
-      (c) => c.summary && normalizar(c.summary) === ALVO,
+      (c) =>
+        c.summary &&
+        normalizar(c.summary) === ALVO &&
+        (c.accessRole === "owner" || c.accessRole === "writer"),
     );
     if (achada) {
       await prisma.googleAccount.update({

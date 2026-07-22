@@ -42,7 +42,17 @@ export function CalendarSelect({
     });
   }
 
-  if (agendas.length === 0) return null;
+  // Sem agendas graváveis: quase sempre é agenda compartilhada só para leitura,
+  // que nem chega a aparecer aqui. Explica em vez de mostrar um campo vazio.
+  if (agendas.length === 0) {
+    return (
+      <p className="mt-4 rounded-xl border border-warning/40 bg-warning-subtle/40 p-3 text-xs leading-relaxed text-muted">
+        Nenhuma agenda em que você possa criar eventos. Se a agenda da Atlas foi
+        compartilhada com você apenas para leitura, peça permissão de{" "}
+        <strong>&quot;Fazer alterações nos eventos&quot;</strong> a quem é dono dela.
+      </p>
+    );
+  }
 
   return (
     <div className="mt-4 rounded-xl border border-border p-3">
