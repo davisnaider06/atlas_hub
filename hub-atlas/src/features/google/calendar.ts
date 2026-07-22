@@ -86,14 +86,26 @@ export async function ensureAtlasCalendar(userId: string): Promise<string | null
   const token = await getValidAccessToken(userId);
   if (!token) return null;
 
-  // já sabemos qual é? confirma que ainda existe antes de confiar
+  // Já existe agenda definida (escolhida na tela de Configurações ou descoberta
+  // antes). Só abrimos mão dela se o Google disser que ela SUMIU (404/410).
+  //
+  // Qualquer outra falha — rede, 5xx, limite — mantém a escolha: como pode
+  // haver duas agendas com nome equivalente ("Atlas Agendamentos" e
+  // "ATLAS - AGENDAMENTOS"), re-descobrir por nome trocaria a agenda do usuário
+  // por outra silenciosamente, e os eventos passariam a cair no lugar errado.
   if (conta.calendarId) {
     const res = await googleFetch(
       token,
       `/calendars/${encodeURIComponent(conta.calendarId)}`,
     );
     if (res.ok) return conta.calendarId;
-    // agenda foi apagada no Google: cai pro fluxo de recriar
+    if (res.status !== 404 && res.status !== 410) {
+      console.error(
+        `[google-sync] verificação da agenda falhou (${res.status}); mantendo a configurada`,
+      );
+      return conta.calendarId;
+    }
+    console.error("[google-sync] agenda configurada não existe mais; procurando outra");
   }
 
   const lista = await googleFetch(token, "/users/me/calendarList?maxResults=250");
@@ -154,18 +166,25 @@ function corpoDoEvento(a: Agendamento) {
 export async function syncAppointmentToGoogle(
   appointmentId: string,
 ): Promise<{ ok: boolean; motivo?: string }> {
+  // O push é tolerante a falha (o Hub é a fonte de verdade), então sem log
+  // uma falha some sem deixar rastro — e foi exatamente o que aconteceu.
+  const falhar = (motivo: string) => {
+    console.error(`[google-sync] push falhou (${appointmentId}): ${motivo}`);
+    return { ok: false, motivo };
+  };
+
   const a = (await prisma.appointment.findUnique({
     where: { id: appointmentId },
     include: { contact: { select: { name: true, email: true } } },
   })) as Agendamento | null;
 
-  if (!a) return { ok: false, motivo: "agendamento não encontrado" };
+  if (!a) return falhar("agendamento não encontrado");
 
   const token = await getValidAccessToken(a.assignedToId);
-  if (!token) return { ok: false, motivo: "atendente não conectou o Google Calendar" };
+  if (!token) return falhar("atendente não conectou o Google Calendar");
 
   const calendarId = await ensureAtlasCalendar(a.assignedToId);
-  if (!calendarId) return { ok: false, motivo: "não foi possível acessar a agenda Atlas" };
+  if (!calendarId) return falhar("não foi possível acessar a agenda Atlas");
 
   const criando = !a.googleEventId;
   const base = `/calendars/${encodeURIComponent(calendarId)}/events`;
@@ -186,9 +205,9 @@ export async function syncAppointmentToGoogle(
         where: { id: a.id },
         data: { googleEventId: null, googleCalendarId: null },
       });
-      return { ok: false, motivo: "evento não existe mais no Google; será recriado" };
+      return falhar("evento não existe mais no Google; será recriado");
     }
-    return { ok: false, motivo: `Google respondeu ${res.status}: ${texto.slice(0, 200)}` };
+    return falhar(`Google respondeu ${res.status}: ${texto.slice(0, 300)}`);
   }
 
   const evento = (await res.json()) as { id: string };
@@ -206,7 +225,10 @@ export async function removeAppointmentFromGoogle(appointmentId: string) {
   if (!a?.googleEventId) return { ok: true };
 
   const token = await getValidAccessToken(a.assignedToId);
-  if (!token) return { ok: false, motivo: "sem conexão com o Google" };
+  if (!token) {
+    console.error(`[google-sync] delete falhou (${appointmentId}): sem token`);
+    return { ok: false, motivo: "sem conexão com o Google" };
+  }
 
   const calendarId = a.googleCalendarId ?? (await ensureAtlasCalendar(a.assignedToId));
   if (!calendarId) return { ok: false, motivo: "agenda não encontrada" };
@@ -219,6 +241,10 @@ export async function removeAppointmentFromGoogle(appointmentId: string) {
 
   // 404/410 = já não está lá; para o nosso objetivo é sucesso
   if (!res.ok && res.status !== 404 && res.status !== 410) {
+    const texto = await res.text();
+    console.error(
+      `[google-sync] delete falhou (${appointmentId}): ${res.status} ${texto.slice(0, 300)}`,
+    );
     return { ok: false, motivo: `Google respondeu ${res.status}` };
   }
 
