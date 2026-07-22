@@ -45,6 +45,10 @@ services:
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
     restart: unless-stopped
     env_file: .env
+    environment:
+      # Sem isto o container roda em UTC e as datas renderizadas no servidor
+      # apareciam 3h adiantadas (um evento das 16:30 saía como 19:30).
+      TZ: America/Sao_Paulo
     depends_on:
       migrator:
         condition: service_completed_successfully

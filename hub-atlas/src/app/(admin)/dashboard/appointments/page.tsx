@@ -57,6 +57,14 @@ function LinhaAgendamento({ a }: { a: AppointmentListItem }) {
           <p className="text-xs font-medium tabular-nums">{dataLonga.format(a.startsAt)}</p>
           <p className="text-xs text-subtle tabular-nums">até {hora.format(a.endsAt)}</p>
         </div>
+        {!a.googleEventId && a.status === "SCHEDULED" && (
+          <span
+            title="Não está no Google Calendar"
+            className="shrink-0 rounded-full bg-warning-subtle px-2 py-0.5 text-[0.7rem] font-medium text-warning"
+          >
+            fora do Google
+          </span>
+        )}
         <Badge tone={tomDoStatus(a.status)}>{rotuloStatus[a.status] ?? a.status}</Badge>
       </Link>
     </li>

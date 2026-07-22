@@ -6,6 +6,7 @@ import { IconChevronLeft } from "@/components/ui/icons";
 import { updateAppointment } from "@/features/appointments/actions";
 import { AppointmentForm } from "@/features/appointments/appointment-form";
 import { AppointmentActionsBar } from "@/features/appointments/appointment-actions-bar";
+import { SyncBadge } from "@/features/appointments/sync-badge";
 import {
   getAppointmentById,
   getAttendantOptions,
@@ -109,12 +110,9 @@ export default async function AppointmentPage({
           </div>
         </dl>
 
-        {/* aviso enquanto a integração com o Google não existe (Fase C) */}
+        {/* não chegou ao Google: avisa e oferece reenvio */}
         {!appointment.googleEventId && appointment.status === "SCHEDULED" && (
-          <p className="mt-4 rounded-xl border border-border bg-surface-sunken/50 p-3 text-xs text-muted">
-            Este agendamento existe apenas no Hub. A sincronização com o Google
-            Calendar (e o convite ao cliente) ainda não está ativa.
-          </p>
+          <SyncBadge appointmentId={appointment.id} />
         )}
       </Card>
 

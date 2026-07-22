@@ -107,6 +107,20 @@ export async function completeAppointment(id: string) {
   redirect("/dashboard/appointments");
 }
 
+/**
+ * Reenvia um agendamento que não chegou ao Google.
+ *
+ * O push é tolerante a falha de propósito (o Hub é a fonte de verdade), mas
+ * sem uma forma de reenviar o agendamento ficaria só no Hub para sempre.
+ */
+export async function retrySync(id: string) {
+  await requireAdmin();
+  const resultado = await syncAppointmentToGoogle(id);
+
+  revalidarTudo(id);
+  return resultado;
+}
+
 export async function deleteAppointment(id: string) {
   await requireAdmin();
 
