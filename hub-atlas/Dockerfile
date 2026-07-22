@@ -54,6 +54,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Diretório dos documentos. Precisa existir com o dono certo ANTES do volume
+# ser montado: o Docker herda dono/permissão do diretório da imagem ao criar o
+# volume. Sem isto ele nasce como root e o app (que roda como nextjs) não
+# consegue gravar — todo upload falharia com "permission denied".
+RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
+
 USER nextjs
 
 ENV PORT=8080
