@@ -51,8 +51,10 @@ const sections: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Em breve",
-    items: [{ href: "#", label: "Documentos", icon: IconDocuments, soon: true }],
+    title: "Biblioteca",
+    items: [
+      { href: "/dashboard/documents", label: "Documentos", icon: IconDocuments },
+    ],
   },
   {
     title: "Conta",

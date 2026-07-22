@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeading } from "@/components/ui/card";
 import { Badge } from "@/components/ui/field";
 import { IconChevronLeft } from "@/components/ui/icons";
 import { updateContact } from "@/features/crm/actions";
@@ -8,6 +8,9 @@ import { ContactForm } from "@/features/crm/contact-form";
 import { DeleteContactButton } from "@/features/crm/delete-contact-button";
 import { getContactById, getPipelineStages } from "@/features/crm/queries";
 import { getActiveServices } from "@/features/services/queries";
+import { getContactDocuments } from "@/features/documents/queries";
+import { DocumentList } from "@/features/documents/document-list";
+import { UploadForm } from "@/features/documents/upload-form";
 
 function iniciais(nome: string) {
   return nome
@@ -24,10 +27,11 @@ export default async function ContactPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [contact, stages, services] = await Promise.all([
+  const [contact, stages, services, documentos] = await Promise.all([
     getContactById(id),
     getPipelineStages(),
     getActiveServices(),
+    getContactDocuments(id),
   ]);
 
   if (!contact) notFound();
@@ -61,6 +65,22 @@ export default async function ContactPage({
           </div>
           <DeleteContactButton contactId={contact.id} contactName={contact.name} />
         </div>
+      </Card>
+
+      {/* documentos do contato */}
+      <Card className="p-5">
+        <CardHeading
+          label={`${documentos.length} ${documentos.length === 1 ? "arquivo" : "arquivos"}`}
+          title="Documentos"
+        />
+        <div className="mt-4">
+          <UploadForm contactId={contact.id} />
+        </div>
+        {documentos.length > 0 && (
+          <div className="mt-5 border-t border-border pt-4">
+            <DocumentList documentos={documentos} />
+          </div>
+        )}
       </Card>
 
       {/* edição */}

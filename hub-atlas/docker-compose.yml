@@ -49,6 +49,10 @@ services:
       # Sem isto o container roda em UTC e as datas renderizadas no servidor
       # apareciam 3h adiantadas (um evento das 16:30 saía como 19:30).
       TZ: America/Sao_Paulo
+      # Documentos ficam em volume, fora da imagem: rebuild não apaga arquivo.
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
     depends_on:
       migrator:
         condition: service_completed_successfully
@@ -72,5 +76,7 @@ services:
 
 volumes:
   pgdata:
+  # documentos enviados pelo Hub — incluídos no backup diário
+  uploads:
   caddy_data:
   caddy_config:

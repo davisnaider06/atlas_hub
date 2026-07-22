@@ -221,19 +221,49 @@ model Task {
   @@index([contactId])
 }
 
-model Document {
-  id           String   @id @default(cuid())
-  fileName     String
-  gcsObjectKey String
-  mimeType     String
-  sizeBytes    Int
-  createdAt    DateTime @default(now())
+enum DocumentScope {
+  /// Material de um lead/cliente específico (proposta, contrato...).
+  CONTACT
+  /// Documento interno da Atlas, sem dono: script, planejamento, escopo.
+  INTERNAL
+}
 
-  contactId String
-  contact   Contact @relation(fields: [contactId], references: [id])
+enum DocumentCategory {
+  SCRIPT
+  PLANNING
+  SCOPE
+  CONTRACT
+  PROPOSAL
+  OTHER
+}
+
+model Document {
+  id          String  @id @default(cuid())
+  /// Nome original do arquivo enviado.
+  fileName    String
+  /// Nome amigável exibido nas listas; cai pro fileName quando vazio.
+  title       String?
+  description String?
+
+  /// Caminho relativo dentro do diretório de uploads.
+  /// (Antes era gcsObjectKey, de quando o plano era Google Cloud Storage.)
+  storageKey String
+  mimeType   String
+  sizeBytes  Int
+
+  scope    DocumentScope
+  category DocumentCategory @default(OTHER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Preenchido só quando scope = CONTACT.
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   uploadedById String
   uploadedBy   User   @relation(fields: [uploadedById], references: [id])
 
   @@index([contactId])
+  @@index([scope, category])
 }
