@@ -50,6 +50,18 @@ export function can(role: Role | undefined | null, cap: Capability) {
   return MATRIZ[role]?.includes(cap) ?? false;
 }
 
+/**
+ * Todas as capacidades de um papel — direto da matriz.
+ *
+ * Use isto (e não uma lista à parte) pra dizer ao menu o que mostrar: uma lista
+ * hardcoded desatualiza silenciosamente quando se adiciona uma capacidade nova,
+ * e o item some do menu sem erro nenhum. Já aconteceu com o Financeiro.
+ */
+export function capacidadesDe(role: Role | undefined | null): Capability[] {
+  if (!role) return [];
+  return MATRIZ[role] ?? [];
+}
+
 /** Quem tem acesso à área administrativa (qualquer coisa fora do portal). */
 export function podeAcessarPainel(role: Role | undefined | null) {
   return can(role, "dashboard.view");
