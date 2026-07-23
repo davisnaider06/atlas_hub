@@ -12,6 +12,7 @@ export type Capability =
   | "finance.view" // ver receita, contratos e parcelas
   | "finance.manage" // criar/editar contratos, baixar parcelas
   | "finance.expenses" // despesas — SÓ sócios
+  | "metrics.view" // desempenho e metas dos SDRs
   | "crm.manage" // criar/editar/excluir leads e clientes
   | "crm.view"
   | "appointments.manage"
@@ -25,6 +26,7 @@ const MATRIZ: Record<Role, Capability[]> = {
     "finance.view",
     "finance.manage",
     "finance.expenses",
+    "metrics.view",
     "crm.manage",
     "crm.view",
     "appointments.manage",
@@ -36,6 +38,7 @@ const MATRIZ: Record<Role, Capability[]> = {
     // administrador vê e mexe no faturamento, mas NÃO nas despesas (só sócio)
     "finance.view",
     "finance.manage",
+    "metrics.view",
     "crm.manage",
     "crm.view",
     "appointments.manage",

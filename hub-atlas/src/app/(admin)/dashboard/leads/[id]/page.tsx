@@ -16,6 +16,8 @@ import { getCurrentUser } from "@/features/auth/current-user";
 import { can } from "@/features/auth/permissions";
 import { getClientContracts } from "@/features/finance/queries";
 import { ClientContracts } from "@/features/finance/client-contracts";
+import { OwnerSelect } from "@/features/crm/owner-select";
+import { getMembrosAtribuiveis } from "@/features/routine/queries";
 
 function iniciais(nome: string) {
   return nome
@@ -32,12 +34,13 @@ export default async function ContactPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [contact, stages, services, documentos, eu] = await Promise.all([
+  const [contact, stages, services, documentos, eu, sdrs] = await Promise.all([
     getContactById(id),
     getPipelineStages(),
     getActiveServices(),
     getContactDocuments(id),
     getCurrentUser(),
+    getMembrosAtribuiveis(),
   ]);
 
   if (!contact) notFound();
@@ -77,6 +80,15 @@ export default async function ContactPage({
             <WhatsAppButton telefone={contact.phone} nome={contact.name} />
             <DeleteContactButton contactId={contact.id} contactName={contact.name} />
           </div>
+        </div>
+
+        {/* SDR responsável */}
+        <div className="mt-4 border-t border-border pt-3">
+          <OwnerSelect
+            contactId={contact.id}
+            ownerId={contact.ownerId}
+            sdrs={sdrs}
+          />
         </div>
       </Card>
 

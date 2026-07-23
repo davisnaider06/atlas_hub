@@ -41,14 +41,36 @@ function revalidarCrm(id?: string) {
 }
 
 export async function createContact(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const data = contactDataFromForm(formData);
   const type = await tipoParaEstagio(data.stageId);
 
-  const contact = await prisma.contact.create({ data: { ...data, type } });
+  // quem cria o lead vira o SDR responsável (base das métricas por pessoa)
+  const contact = await prisma.contact.create({
+    data: { ...data, type, ownerId: user.id },
+  });
 
   revalidarCrm(contact.id);
   redirect(`/dashboard/leads/${contact.id}`);
+}
+
+/** Reatribui o lead a outro SDR. Não vem do formulário de edição pra evitar
+ *  trocar o dono sem querer ao salvar outros campos. */
+export async function reassignOwner(contactId: string, ownerId: string) {
+  await requireAdmin();
+
+  const alvo = ownerId
+    ? await prisma.user.findUnique({ where: { id: ownerId } })
+    : null;
+  // string vazia = remover dono; id inválido é rejeitado
+  if (ownerId && !alvo) throw new Error("Responsável inválido");
+
+  await prisma.contact.update({
+    where: { id: contactId },
+    data: { ownerId: ownerId || null },
+  });
+
+  revalidarCrm(contactId);
 }
 
 export async function updateContact(id: string, formData: FormData) {

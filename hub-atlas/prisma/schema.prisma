@@ -39,7 +39,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contact   Contact?      @relation(fields: [contactId], references: [id])
+  // Login do portal: este usuário É o acesso de um Contact (cliente).
+  contact   Contact?      @relation("PortalUser", fields: [contactId], references: [id])
   contactId String?       @unique
   documents Document[]
 
@@ -49,6 +50,13 @@ model User {
   googleAccount GoogleAccount?
   tasks         Task[]
   expenses      Expense[]
+
+  // Leads/clientes de que este usuário (SDR) é responsável.
+  ownedContacts Contact[] @relation("OwnedContacts")
+
+  // Meta de vendas do mês (centavos) e comissão. Base pra tela de desempenho.
+  salesTargetCents  Int  @default(1000000)
+  commissionPercent Int?
 }
 
 // Conexão OAuth de um membro do time com o Google Calendar.
@@ -137,7 +145,12 @@ model Contact {
   stageId String
   stage   PipelineStage @relation(fields: [stageId], references: [id])
 
-  user         User?
+  // SDR responsável. Opcional: contatos vindos do Google ou antigos podem não
+  // ter dono. A atribuição alimenta as métricas por SDR.
+  ownerId String?
+  owner   User?   @relation("OwnedContacts", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  user         User?         @relation("PortalUser")
   appointments Appointment[]
   tasks        Task[]
   documents    Document[]
@@ -145,6 +158,7 @@ model Contact {
 
   @@index([stageId])
   @@index([email])
+  @@index([ownerId])
 }
 
 enum ContractType {

@@ -17,6 +17,7 @@ import {
   IconServices,
   IconSettings,
   IconTeam,
+  IconTrendUp,
 } from "@/components/ui/icons";
 
 type NavItem = {
@@ -43,6 +44,12 @@ const sections: { title: string; items: NavItem[] }[] = [
   {
     title: "Gestão",
     items: [
+      {
+        href: "/dashboard/metrics",
+        label: "Desempenho",
+        icon: IconTrendUp,
+        cap: "metrics.view",
+      },
       {
         href: "/dashboard/finance",
         label: "Financeiro",
