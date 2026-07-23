@@ -5,7 +5,7 @@ import { DrawerToggle } from "@/features/shell/drawer-toggle";
 
 export function Topbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-bg/60 backdrop-blur-xl backdrop-saturate-150">
+    <header className="sticky top-0 z-40 border-b border-border bg-bg/60 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150">
       <div className="flex h-16 items-center gap-3 px-5 sm:px-7">
         {/* menu (só mobile) */}
         <DrawerToggle />

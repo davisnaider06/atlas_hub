@@ -25,7 +25,9 @@ export default async function AdminLayout({
           atributo no <html>, então isso anima junto com o retrair). */}
       <div className="flex min-h-screen flex-col transition-[padding] duration-200 lg:pl-64 lg:collapsed:pl-16">
         <Topbar />
-        <main className="flex-1 px-5 py-6 sm:px-7">{children}</main>
+        <main className="flex-1 px-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-7">
+          {children}
+        </main>
       </div>
     </div>
   );

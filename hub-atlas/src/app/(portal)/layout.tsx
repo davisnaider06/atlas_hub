@@ -18,7 +18,7 @@ export default async function PortalLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 border-b border-border bg-bg/60 backdrop-blur-xl backdrop-saturate-150">
+      <header className="sticky top-0 z-40 border-b border-border bg-bg/60 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-5 sm:px-7">
           <Link href="/portal" className="flex items-center gap-2.5">
             <span className="grid size-8 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">

@@ -37,7 +37,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex h-16 items-center gap-3 px-5 sm:px-7">
+      <header className="flex h-16 items-center gap-3 px-5 pt-[env(safe-area-inset-top)] sm:px-7">
         <div className="flex items-center gap-2.5">
           <span className="grid size-8 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-fg">
             A

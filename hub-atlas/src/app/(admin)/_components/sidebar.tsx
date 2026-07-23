@@ -121,7 +121,7 @@ export function Sidebar({ caps }: { caps: Capability[] }) {
       />
 
       <aside
-        className="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-border bg-surface/95 backdrop-blur-xl transition-[transform,width] duration-200 drawer:translate-x-0 lg:translate-x-0 lg:bg-surface/70 lg:collapsed:w-16"
+        className="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] backdrop-blur-xl transition-[transform,width] duration-200 drawer:translate-x-0 lg:translate-x-0 lg:bg-surface/70 lg:collapsed:w-16"
       >
         {/* marca + botão de retrair (retrair é só desktop) */}
         <div className="flex h-16 items-center gap-2.5 px-4 lg:collapsed:justify-center lg:collapsed:px-0">
