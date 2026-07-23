@@ -1,11 +1,15 @@
 import { UserButton } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { IconBell, IconSearch } from "@/components/ui/icons";
+import { DrawerToggle } from "@/features/shell/drawer-toggle";
 
 export function Topbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/60 backdrop-blur-xl backdrop-saturate-150">
       <div className="flex h-16 items-center gap-3 px-5 sm:px-7">
+        {/* menu (só mobile) */}
+        <DrawerToggle />
+
         {/* busca */}
         <label className="relative hidden min-w-0 flex-1 items-center sm:flex sm:max-w-sm">
           <IconSearch className="pointer-events-none absolute left-3 size-4 text-subtle" />

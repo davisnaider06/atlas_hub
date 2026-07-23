@@ -6,9 +6,12 @@
    --------------------------------------------------------------------------- */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Sidebar retraída: estado fica no <html data-sidebar="collapsed">, igual ao
-   tema. Permite `collapsed:` em qualquer elemento e evita flash no carregamento. */
+/* Sidebar retraída (desktop): estado no <html data-sidebar="collapsed">. */
 @custom-variant collapsed (&:where([data-sidebar="collapsed"] *));
+
+/* Drawer aberto (mobile): estado no <html data-drawer="open">, ligado pelo
+   botão de menu da topbar. No desktop o menu é sempre visível e ignora isto. */
+@custom-variant drawer (&:where([data-drawer="open"] *));
 
 /* ---------------------------------------------------------------------------
    TOKENS — paleta extraída das referências de design (dashboards CoinSphere /

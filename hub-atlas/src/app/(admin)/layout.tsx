@@ -19,11 +19,11 @@ export default async function AdminLayout({
   const caps = capacidadesDe(dbUser?.role);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-clip">
       <Sidebar caps={caps} />
       {/* margem acompanha a largura do sidebar (a variante `collapsed` vem do
           atributo no <html>, então isso anima junto com o retrair). */}
-      <div className="flex min-h-screen flex-col pl-64 transition-[padding] duration-200 collapsed:pl-16">
+      <div className="flex min-h-screen flex-col transition-[padding] duration-200 lg:pl-64 lg:collapsed:pl-16">
         <Topbar />
         <main className="flex-1 px-5 py-6 sm:px-7">{children}</main>
       </div>
