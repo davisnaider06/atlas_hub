@@ -9,6 +9,9 @@ export type Capability =
   | "team.manage" // convidar/remover pessoas e mudar papéis
   | "tasks.assign" // criar tarefa NO NOME DE outra pessoa e ver a rotina dela
   | "services.manage" // catálogo de serviços
+  | "finance.view" // ver receita, contratos e parcelas
+  | "finance.manage" // criar/editar contratos, baixar parcelas
+  | "finance.expenses" // despesas — SÓ sócios
   | "crm.manage" // criar/editar/excluir leads e clientes
   | "crm.view"
   | "appointments.manage"
@@ -19,6 +22,9 @@ const MATRIZ: Record<Role, Capability[]> = {
     "team.manage",
     "tasks.assign",
     "services.manage",
+    "finance.view",
+    "finance.manage",
+    "finance.expenses",
     "crm.manage",
     "crm.view",
     "appointments.manage",
@@ -27,6 +33,9 @@ const MATRIZ: Record<Role, Capability[]> = {
   ADMIN: [
     "tasks.assign",
     "services.manage",
+    // administrador vê e mexe no faturamento, mas NÃO nas despesas (só sócio)
+    "finance.view",
+    "finance.manage",
     "crm.manage",
     "crm.view",
     "appointments.manage",

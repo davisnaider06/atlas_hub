@@ -119,6 +119,16 @@ export function IconPlus({ className }: IconProps) {
   );
 }
 
+export function IconFinance({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M3 3v18h18" />
+      <path d="M7 15l3-4 3 2 4-6" />
+      <path d="M17 7h3v3" />
+    </svg>
+  );
+}
+
 export function IconRoutine({ className }: IconProps) {
   return (
     <svg {...base(className)}>

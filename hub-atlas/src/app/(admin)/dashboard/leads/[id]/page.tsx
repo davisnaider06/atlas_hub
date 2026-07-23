@@ -12,6 +12,10 @@ import { getActiveServices } from "@/features/services/queries";
 import { getContactDocuments } from "@/features/documents/queries";
 import { DocumentList } from "@/features/documents/document-list";
 import { UploadForm } from "@/features/documents/upload-form";
+import { getCurrentUser } from "@/features/auth/current-user";
+import { can } from "@/features/auth/permissions";
+import { getClientContracts } from "@/features/finance/queries";
+import { ClientContracts } from "@/features/finance/client-contracts";
 
 function iniciais(nome: string) {
   return nome
@@ -28,14 +32,19 @@ export default async function ContactPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [contact, stages, services, documentos] = await Promise.all([
+  const [contact, stages, services, documentos, eu] = await Promise.all([
     getContactById(id),
     getPipelineStages(),
     getActiveServices(),
     getContactDocuments(id),
+    getCurrentUser(),
   ]);
 
   if (!contact) notFound();
+
+  // contratos: só pra quem vê financeiro e quando o contato já é cliente
+  const mostrarFinanceiro = can(eu?.role, "finance.view") && contact.type === "CLIENT";
+  const contratos = mostrarFinanceiro ? await getClientContracts(id) : [];
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -86,6 +95,23 @@ export default async function ContactPage({
           </div>
         )}
       </Card>
+
+      {/* contratos & financeiro (só cliente + quem vê financeiro) */}
+      {mostrarFinanceiro && (
+        <Card className="p-5">
+          <CardHeading
+            label={`${contratos.length} ${contratos.length === 1 ? "contrato" : "contratos"}`}
+            title="Contratos & financeiro"
+          />
+          <div className="mt-4">
+            <ClientContracts
+              contactId={contact.id}
+              contratos={contratos}
+              servicos={services.map((s) => ({ id: s.id, name: s.name }))}
+            />
+          </div>
+        </Card>
+      )}
 
       {/* edição */}
       <Card className="p-5">

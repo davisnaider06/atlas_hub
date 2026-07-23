@@ -8,6 +8,7 @@ import {
   IconClients,
   IconContacts,
   IconDocuments,
+  IconFinance,
   IconGrid,
   IconHelp,
   IconPipeline,
@@ -40,8 +41,14 @@ const sections: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
-    title: "Catálogo",
+    title: "Gestão",
     items: [
+      {
+        href: "/dashboard/finance",
+        label: "Financeiro",
+        icon: IconFinance,
+        cap: "finance.view",
+      },
       {
         href: "/dashboard/services",
         label: "Serviços",

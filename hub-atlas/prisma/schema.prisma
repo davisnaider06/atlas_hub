@@ -48,6 +48,7 @@ model User {
 
   googleAccount GoogleAccount?
   tasks         Task[]
+  expenses      Expense[]
 }
 
 // Conexão OAuth de um membro do time com o Google Calendar.
@@ -111,7 +112,8 @@ model Service {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contacts Contact[]
+  contacts  Contact[]
+  contracts Contract[]
 }
 
 // Lead ou cliente. Vira CLIENT automaticamente ao entrar no estágio de
@@ -139,9 +141,103 @@ model Contact {
   appointments Appointment[]
   tasks        Task[]
   documents    Document[]
+  contracts    Contract[]
 
   @@index([stageId])
   @@index([email])
+}
+
+enum ContractType {
+  /// Projeto pontual: valor fechado, geralmente parcelado.
+  ONE_OFF
+  /// Recorrente: mensalidade (manutenção, hospedagem, automação de IA).
+  RECURRING
+}
+
+enum ContractStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+/// Contrato de um cliente. Um cliente pode ter vários (ex: um projeto + uma
+/// manutenção recorrente), por isso não fica direto no Contact.
+model Contract {
+  id     String         @id @default(cuid())
+  title  String?
+  type   ContractType
+  status ContractStatus @default(ACTIVE)
+
+  /// ONE_OFF usa totalCents; RECURRING usa monthlyCents. Centavos (Int) porque
+  /// dinheiro em float acumula erro de arredondamento.
+  totalCents   Int?
+  monthlyCents Int?
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contactId String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  installments Installment[]
+
+  @@index([contactId])
+  @@index([status])
+}
+
+enum InstallmentStatus {
+  PENDING
+  PAID
+}
+
+/// Parcela de um contrato. O status "atrasado" NÃO é guardado: é derivado no
+/// código (vencimento passou + ainda PENDING), pra não precisar de um cron
+/// virando status todo dia.
+model Installment {
+  id     String            @id @default(cuid())
+  number Int
+  amountCents Int
+  dueDate     DateTime
+  status      InstallmentStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime          @default(now())
+
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId])
+  @@index([status, dueDate])
+}
+
+enum ExpenseCategory {
+  PAYROLL
+  TOOLS
+  MARKETING
+  INFRA
+  TAXES
+  OTHER
+}
+
+/// Despesa da Atlas. Visível SÓ pra sócios (capacidade finance.expenses).
+model Expense {
+  id          String          @id @default(cuid())
+  description String
+  amountCents Int
+  category    ExpenseCategory @default(OTHER)
+  spentAt     DateTime
+  /// custo fixo que se repete todo mês (aluguel, salário, ferramenta)
+  recurring   Boolean         @default(false)
+  notes       String?
+  createdAt   DateTime        @default(now())
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  @@index([spentAt])
 }
 
 enum AppointmentStatus {
