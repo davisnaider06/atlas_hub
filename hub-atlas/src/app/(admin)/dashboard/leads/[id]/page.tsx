@@ -6,6 +6,7 @@ import { IconChevronLeft } from "@/components/ui/icons";
 import { updateContact } from "@/features/crm/actions";
 import { ContactForm } from "@/features/crm/contact-form";
 import { DeleteContactButton } from "@/features/crm/delete-contact-button";
+import { WhatsAppButton } from "@/features/whatsapp/whatsapp-button";
 import { getContactById, getPipelineStages } from "@/features/crm/queries";
 import { getActiveServices } from "@/features/services/queries";
 import { getContactDocuments } from "@/features/documents/queries";
@@ -63,7 +64,10 @@ export default async function ContactPage({
               </div>
             </div>
           </div>
-          <DeleteContactButton contactId={contact.id} contactName={contact.name} />
+          <div className="flex items-center gap-2">
+            <WhatsAppButton telefone={contact.phone} nome={contact.name} />
+            <DeleteContactButton contactId={contact.id} contactName={contact.name} />
+          </div>
         </div>
       </Card>
 

@@ -4,6 +4,7 @@ import { Badge, EmptyState, fieldClasses } from "@/components/ui/field";
 import { Card } from "@/components/ui/card";
 import { IconContacts, IconPlus, IconSearch } from "@/components/ui/icons";
 import { getContacts } from "@/features/crm/queries";
+import { WhatsAppButton } from "@/features/whatsapp/whatsapp-button";
 
 function iniciais(nome: string) {
   return nome
@@ -88,6 +89,7 @@ export default async function ContactsPage({
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Empresa</th>
                   <th className="px-4 py-3 font-medium">Estágio</th>
+                  <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -108,6 +110,13 @@ export default async function ContactsPage({
                     <td className="px-4 py-3 text-muted">{contact.company ?? "—"}</td>
                     <td className="px-4 py-3">
                       <Badge>{contact.stage.name}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <WhatsAppButton
+                        telefone={contact.phone}
+                        nome={contact.name}
+                        variante="icone"
+                      />
                     </td>
                   </tr>
                 ))}
